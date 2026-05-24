@@ -1,0 +1,4 @@
+REM Flush ALL iptables rules (resets to open/accept all — use carefully)
+DELAY 500
+STRING read -p "Type FLUSH to confirm removing all iptables rules: " c; [ "$c" = "FLUSH" ] && sudo iptables -F && sudo iptables -X && sudo iptables -t nat -F && echo "All iptables rules flushed." || echo "Aborted."
+ENTER

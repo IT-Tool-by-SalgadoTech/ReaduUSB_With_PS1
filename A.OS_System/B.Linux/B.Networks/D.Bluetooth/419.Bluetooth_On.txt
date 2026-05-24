@@ -1,0 +1,4 @@
+REM Turn Bluetooth on
+DELAY 500
+STRING sudo systemctl start bluetooth && bluetoothctl power on && echo "Bluetooth ON."
+ENTER

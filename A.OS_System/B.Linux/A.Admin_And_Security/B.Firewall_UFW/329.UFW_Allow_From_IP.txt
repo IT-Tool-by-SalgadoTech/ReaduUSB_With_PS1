@@ -1,0 +1,4 @@
+REM Allow all traffic from a specific IP
+DELAY 500
+STRING read -p "IP address to allow: " ip; sudo ufw allow from "$ip" && echo "Allowed all from $ip"
+ENTER

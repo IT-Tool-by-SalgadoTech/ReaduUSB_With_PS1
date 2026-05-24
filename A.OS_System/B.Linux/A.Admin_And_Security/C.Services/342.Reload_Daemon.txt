@@ -1,0 +1,4 @@
+REM Reload systemd manager configuration (after editing unit files)
+DELAY 500
+STRING sudo systemctl daemon-reload && echo "Daemon reloaded."
+ENTER

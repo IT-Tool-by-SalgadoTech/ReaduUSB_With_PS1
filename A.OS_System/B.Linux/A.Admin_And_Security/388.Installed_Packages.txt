@@ -1,0 +1,4 @@
+REM List all installed packages (dpkg/apt)
+DELAY 500
+STRING dpkg --get-selections | grep -v deinstall | less
+ENTER

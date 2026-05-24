@@ -1,0 +1,4 @@
+REM Capture packets on an interface and save to file
+DELAY 500
+STRING read -p "Interface (e.g. eth0, wlan0): " i; read -p "Output file (e.g. capture.pcap): " out; read -p "Packet count (Enter for unlimited): " n; if [ -z "$n" ]; then sudo tcpdump -i "$i" -w "$out"; else sudo tcpdump -i "$i" -c "$n" -w "$out"; fi && echo "Saved to $out"
+ENTER

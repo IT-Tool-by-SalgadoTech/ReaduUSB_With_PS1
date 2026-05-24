@@ -1,0 +1,4 @@
+REM Spoof MAC address on an interface for anonymity
+DELAY 500
+STRING read -p "Interface (e.g. eth0, wlan0): " i; sudo ip link set "$i" down; read -p "New MAC (Enter for random): " mac; if [ -z "$mac" ]; then sudo macchanger -r "$i"; else sudo macchanger -m "$mac" "$i"; fi; sudo ip link set "$i" up && macchanger -s "$i"
+ENTER

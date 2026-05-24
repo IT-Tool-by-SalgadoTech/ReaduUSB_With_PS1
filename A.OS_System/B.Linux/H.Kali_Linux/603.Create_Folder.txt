@@ -1,0 +1,5 @@
+DELAY 1500
+CTRL ALT T
+DELAY 2000
+STRING printf "path: "; read path; cmd="/bin/mkdir -p $path"; print -z -- "$cmd"
+ENTER

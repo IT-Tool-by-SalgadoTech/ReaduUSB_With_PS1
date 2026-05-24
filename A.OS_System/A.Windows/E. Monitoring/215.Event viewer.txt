@@ -1,0 +1,6 @@
+REM Launch eventvwr
+DELAY 1000
+GUI r
+DELAY 1000
+STRING eventvwr.msc
+ENTER

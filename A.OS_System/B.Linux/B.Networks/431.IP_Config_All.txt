@@ -1,0 +1,4 @@
+REM Show all network interfaces and their IP configuration
+DELAY 500
+STRING ip addr show
+ENTER

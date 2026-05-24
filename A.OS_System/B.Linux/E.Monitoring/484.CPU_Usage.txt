@@ -1,0 +1,4 @@
+REM Show CPU usage snapshot and top consumers
+DELAY 500
+STRING echo "=== CPU INFO ===" && top -bn1 | grep "Cpu(s)" && echo "" && echo "=== Top 10 CPU Processes ===" && ps aux --sort=-%cpu | awk 'NR<=11{printf "%-10s %-25s %s%%\n", $1, $11, $3}'
+ENTER

@@ -1,0 +1,4 @@
+REM Show files opened by a process (by PID)
+DELAY 500
+STRING read -p "PID: " pid; sudo lsof -p "$pid" 2>/dev/null | head -30
+ENTER

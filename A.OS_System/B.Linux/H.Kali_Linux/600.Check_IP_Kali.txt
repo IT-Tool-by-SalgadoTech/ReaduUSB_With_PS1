@@ -1,0 +1,6 @@
+DELAY 800
+CTRL ALT T
+DELAY 1500
+STRING printf "Domain name: "; read Domain_Name; cmd="nslookup $Domain_Name"; print -z -- "$cmd"
+DELAY 1800
+ENTER

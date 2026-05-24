@@ -1,0 +1,4 @@
+REM Show CPU usage broken down per core (1 second snapshot)
+DELAY 500
+STRING mpstat -P ALL 1 1 2>/dev/null || top -bn1 | grep "Cpu"
+ENTER

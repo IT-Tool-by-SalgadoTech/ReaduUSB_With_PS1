@@ -1,0 +1,4 @@
+REM Full hardware report (requires lshw)
+DELAY 500
+STRING sudo lshw -short 2>/dev/null || echo "lshw not installed. Run: sudo apt install lshw"
+ENTER

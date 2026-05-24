@@ -1,0 +1,4 @@
+REM Check status of critical ports: SSH(22) RDP(3389) HTTP(80) HTTPS(443) FTP(21)
+DELAY 500
+STRING read -p "Target IP or hostname: " t; nmap -p 21,22,80,443,3389,8080 -T4 "$t"
+ENTER

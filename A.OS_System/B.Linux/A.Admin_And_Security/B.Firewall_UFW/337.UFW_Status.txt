@@ -1,0 +1,4 @@
+REM Show UFW firewall status and all rules
+DELAY 500
+STRING sudo ufw status verbose
+ENTER

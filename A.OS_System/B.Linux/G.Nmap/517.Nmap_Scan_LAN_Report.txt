@@ -1,0 +1,4 @@
+REM Scan entire LAN and save report to Desktop
+DELAY 500
+STRING read -p "Subnet (e.g. 192.168.1.0/24): " s; out=~/Desktop/nmap_scan_$(date +%Y%m%d_%H%M%S).txt; nmap -T4 -A "$s" -oN "$out" && echo "Report saved to $out"
+ENTER

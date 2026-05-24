@@ -1,0 +1,4 @@
+REM List all users with login shell
+DELAY 500
+STRING awk -F: '$7 ~ /bash|sh/ {print $1, "UID:"$3, "Home:"$6}' /etc/passwd
+ENTER

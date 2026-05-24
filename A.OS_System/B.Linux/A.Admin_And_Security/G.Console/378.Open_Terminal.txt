@@ -1,0 +1,4 @@
+REM Open standard user terminal (GNOME/Ubuntu)
+DELAY 800
+CTRL ALT T
+DELAY 2000

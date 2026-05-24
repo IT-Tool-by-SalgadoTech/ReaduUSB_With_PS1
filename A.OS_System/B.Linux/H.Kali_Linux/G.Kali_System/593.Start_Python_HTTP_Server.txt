@@ -1,0 +1,4 @@
+REM Start a quick Python HTTP server in current directory (file transfer)
+DELAY 500
+STRING read -p "Port (Enter for 8080): " p; p="${p:-8080}"; echo "Serving $(pwd) on port $p (Ctrl+C to stop)"; python3 -m http.server "$p"
+ENTER

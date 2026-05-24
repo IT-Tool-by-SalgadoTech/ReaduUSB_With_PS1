@@ -1,0 +1,4 @@
+REM List all connected USB devices with details
+DELAY 500
+STRING lsusb -v 2>/dev/null | grep -E "Bus|Device|idVendor|idProduct|iProduct|iManufacturer" | head -80
+ENTER

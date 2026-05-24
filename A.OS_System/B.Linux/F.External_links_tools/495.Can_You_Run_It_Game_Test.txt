@@ -1,0 +1,4 @@
+REM Open Can You Run It - Game Requirements Test in default browser (Linux)
+DELAY 500
+STRING xdg-open https://www.systemrequirementslab.com/cyri
+ENTER

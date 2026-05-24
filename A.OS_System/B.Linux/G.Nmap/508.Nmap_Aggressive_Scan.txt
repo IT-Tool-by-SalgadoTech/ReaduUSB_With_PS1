@@ -1,0 +1,4 @@
+REM Aggressive scan: OS, version, scripts, traceroute
+DELAY 500
+STRING read -p "Target IP or hostname: " t; sudo nmap -A -T4 -v "$t"
+ENTER

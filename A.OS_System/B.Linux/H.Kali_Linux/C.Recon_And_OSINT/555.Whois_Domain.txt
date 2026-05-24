@@ -1,0 +1,4 @@
+REM WHOIS lookup for a domain or IP
+DELAY 500
+STRING read -p "Domain or IP: " t; whois "$t" | head -40
+ENTER

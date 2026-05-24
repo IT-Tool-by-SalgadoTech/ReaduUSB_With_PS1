@@ -1,0 +1,4 @@
+REM Change owner of a file or folder
+DELAY 500
+STRING read -p "File/folder path: " f; read -p "New owner (user:group): " o; sudo chown -R "$o" "$f" && echo "Owner of $f changed to $o"
+ENTER

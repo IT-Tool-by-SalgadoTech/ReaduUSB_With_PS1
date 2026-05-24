@@ -1,0 +1,4 @@
+REM Empty the user trash
+DELAY 500
+STRING rm -rf ~/.local/share/Trash/files/* ~/.local/share/Trash/info/* && echo "Trash emptied."
+ENTER

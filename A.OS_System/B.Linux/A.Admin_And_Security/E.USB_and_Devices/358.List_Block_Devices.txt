@@ -1,0 +1,4 @@
+REM List all block devices (disks, partitions, USB drives)
+DELAY 500
+STRING lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT,LABEL,UUID
+ENTER

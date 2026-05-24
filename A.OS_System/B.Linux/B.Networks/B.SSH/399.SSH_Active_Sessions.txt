@@ -1,0 +1,4 @@
+REM Show active SSH sessions on this machine
+DELAY 500
+STRING who | grep pts && echo "" && sudo ss -tnp | grep sshd
+ENTER

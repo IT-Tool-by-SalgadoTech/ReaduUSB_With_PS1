@@ -1,0 +1,4 @@
+REM List contents of a .tar.gz archive without extracting
+DELAY 500
+STRING read -p "Archive path: " arc; tar -tzf "$arc"
+ENTER

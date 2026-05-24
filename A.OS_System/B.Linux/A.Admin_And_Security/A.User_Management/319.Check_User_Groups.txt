@@ -1,0 +1,4 @@
+REM Check which groups a user belongs to
+DELAY 500
+STRING read -p "Username: " u; groups "$u"
+ENTER

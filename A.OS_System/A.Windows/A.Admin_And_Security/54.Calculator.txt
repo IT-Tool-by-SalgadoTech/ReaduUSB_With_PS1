@@ -1,0 +1,6 @@
+REM Launch calc
+DELAY 1000
+GUI r
+DELAY 800
+STRING calc
+ENTER

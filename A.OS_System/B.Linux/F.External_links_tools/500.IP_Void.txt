@@ -1,0 +1,4 @@
+REM Open IP Void - IP Reputation Check in default browser (Linux)
+DELAY 500
+STRING xdg-open https://www.ipvoid.com/
+ENTER

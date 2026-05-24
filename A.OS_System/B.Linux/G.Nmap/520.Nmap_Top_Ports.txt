@@ -1,0 +1,4 @@
+REM Scan top 100 most common ports (faster than default)
+DELAY 500
+STRING read -p "Target IP or hostname: " t; nmap --top-ports 100 -T4 "$t"
+ENTER

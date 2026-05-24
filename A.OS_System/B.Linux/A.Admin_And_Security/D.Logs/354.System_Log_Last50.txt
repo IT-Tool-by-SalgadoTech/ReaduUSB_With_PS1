@@ -1,0 +1,4 @@
+REM Show last 50 system log entries (journalctl)
+DELAY 500
+STRING sudo journalctl -n 50 --no-pager
+ENTER

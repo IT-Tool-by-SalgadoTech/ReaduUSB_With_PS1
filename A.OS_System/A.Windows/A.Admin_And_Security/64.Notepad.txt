@@ -1,0 +1,6 @@
+REM Launch notepad
+DELAY 1000
+GUI r
+DELAY 800
+STRING notepad
+ENTER

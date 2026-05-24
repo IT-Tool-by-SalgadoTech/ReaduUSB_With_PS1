@@ -1,0 +1,4 @@
+REM Ejecutar netsh interface ipv6 show interfaces con espera extendida
+DELAY 1500
+STRING netsh interface ipv6 show interfaces
+ENTER

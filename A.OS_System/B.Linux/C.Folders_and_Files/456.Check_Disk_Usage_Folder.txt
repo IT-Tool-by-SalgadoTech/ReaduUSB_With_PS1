@@ -1,0 +1,4 @@
+REM Show disk usage of a folder sorted by size
+DELAY 500
+STRING read -p "Folder path (Enter for current): " d; sudo du -sh "${d:-.}"/* 2>/dev/null | sort -rh | head -20
+ENTER

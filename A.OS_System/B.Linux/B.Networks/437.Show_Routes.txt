@@ -1,0 +1,4 @@
+REM Show routing table
+DELAY 500
+STRING ip route show
+ENTER

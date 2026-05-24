@@ -1,0 +1,4 @@
+REM Connect to SSH on a custom port
+DELAY 500
+STRING read -p "SSH username: " u; read -p "Host: " h; read -p "Port: " p; ssh -p "$p" "$u@$h"
+ENTER

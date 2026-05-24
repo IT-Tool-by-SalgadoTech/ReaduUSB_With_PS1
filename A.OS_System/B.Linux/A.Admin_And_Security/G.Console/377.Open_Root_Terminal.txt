@@ -1,0 +1,6 @@
+REM Open terminal and elevate to root
+DELAY 800
+CTRL ALT T
+DELAY 2000
+STRING sudo -i
+ENTER

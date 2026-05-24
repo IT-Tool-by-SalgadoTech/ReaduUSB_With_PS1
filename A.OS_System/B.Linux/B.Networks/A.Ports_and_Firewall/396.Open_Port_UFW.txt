@@ -1,0 +1,4 @@
+REM Open a port in UFW firewall
+DELAY 500
+STRING read -p "Port to open: " p; read -p "Protocol (tcp/udp): " proto; sudo ufw allow "$p/$proto" && echo "Port $p/$proto opened in UFW."
+ENTER

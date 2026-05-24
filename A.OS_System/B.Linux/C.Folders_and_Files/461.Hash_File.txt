@@ -1,0 +1,4 @@
+REM Calculate hash of a file (MD5/SHA1/SHA256)
+DELAY 500
+STRING read -p "File path: " f; read -p "Algorithm (md5/sha1/sha256): " a; ${a}sum "$f"
+ENTER

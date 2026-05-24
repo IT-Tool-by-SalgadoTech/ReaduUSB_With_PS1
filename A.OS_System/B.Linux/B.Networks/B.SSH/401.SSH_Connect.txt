@@ -1,0 +1,4 @@
+REM Connect to a remote host via SSH
+DELAY 500
+STRING read -p "SSH username: " u; read -p "Host (IP or domain): " h; ssh "$u@$h"
+ENTER

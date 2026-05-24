@@ -1,0 +1,4 @@
+REM Shutdown the system now
+DELAY 500
+STRING read -p "Type SHUTDOWN to confirm: " c; [ "$c" = "SHUTDOWN" ] && sudo poweroff || echo "Aborted."
+ENTER

@@ -1,0 +1,4 @@
+REM Format a partition (DESTRUCTIVE - will erase data)
+DELAY 500
+STRING lsblk; read -p "Partition to format (e.g. sdb1): " d; read -p "Filesystem (ext4/ntfs/fat32/exfat): " fs; read -p "Type FORMAT $d to confirm: " c; [ "$c" = "FORMAT $d" ] && sudo mkfs."$fs" /dev/"$d" && echo "Partition /dev/$d formatted as $fs." || echo "Aborted."
+ENTER

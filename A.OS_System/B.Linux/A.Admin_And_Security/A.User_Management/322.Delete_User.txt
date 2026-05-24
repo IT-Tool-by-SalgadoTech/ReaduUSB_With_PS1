@@ -1,0 +1,4 @@
+REM Delete a user and optionally their home folder
+DELAY 500
+STRING read -p "Username to delete: " u; read -p "Delete home folder? (y/n): " d; if [ "$d" = "y" ]; then sudo userdel -r "$u"; else sudo userdel "$u"; fi && echo "User $u deleted."
+ENTER

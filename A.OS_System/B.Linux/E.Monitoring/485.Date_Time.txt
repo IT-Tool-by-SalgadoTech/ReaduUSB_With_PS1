@@ -1,0 +1,4 @@
+REM Show current date, time and timezone
+DELAY 500
+STRING date && timedatectl status
+ENTER

@@ -1,0 +1,6 @@
+REM Launch shutdown
+DELAY 1000
+GUI r
+DELAY 800
+STRING shutdown -s -t 0
+ENTER

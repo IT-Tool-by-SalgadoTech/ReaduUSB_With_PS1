@@ -1,0 +1,4 @@
+REM Connect to a WiFi network
+DELAY 500
+STRING read -p "SSID (network name): " s; read -p "Password: " p; nmcli dev wifi connect "$s" password "$p" && echo "Connected to $s"
+ENTER

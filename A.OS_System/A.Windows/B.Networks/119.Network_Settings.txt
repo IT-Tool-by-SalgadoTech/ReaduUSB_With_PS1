@@ -1,0 +1,6 @@
+REM Open Windows Network Settings
+DELAY 500
+GUI r
+DELAY 800
+STRING ms-settings:network
+ENTER

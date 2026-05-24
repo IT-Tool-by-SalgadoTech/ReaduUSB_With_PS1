@@ -1,0 +1,7 @@
+DELAY 1000
+STRING nmap -p 1-65535 localhost
+ENTER
+
+
+
+

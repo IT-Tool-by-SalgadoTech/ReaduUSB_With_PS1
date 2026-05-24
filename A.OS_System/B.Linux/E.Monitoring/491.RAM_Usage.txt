@@ -1,0 +1,4 @@
+REM Show RAM usage and top memory consumers
+DELAY 500
+STRING free -h && echo "" && echo "=== Top 10 by RAM ===" && ps aux --sort=-%mem | awk 'NR<=11{printf "%-10s %-25s %s%%\n", $1, $11, $4}'
+ENTER

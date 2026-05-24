@@ -1,0 +1,3 @@
+DELAY 1800
+STRING fsutil fsinfo drives
+ENTER

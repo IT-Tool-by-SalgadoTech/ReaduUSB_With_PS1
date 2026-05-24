@@ -1,0 +1,4 @@
+REM Delete all contents of a folder without deleting the folder itself
+DELAY 500
+STRING read -p "Folder to empty: " d; read -p "Type EMPTY to confirm: " c; [ "$c" = "EMPTY" ] && sudo rm -rf "$d"/* "$d"/.[!.]* 2>/dev/null && echo "Folder $d emptied." || echo "Aborted."
+ENTER

@@ -1,0 +1,4 @@
+REM Reset UFW to default (disables firewall, removes all rules)
+DELAY 500
+STRING read -p "Type RESET to confirm UFW reset: " c; [ "$c" = "RESET" ] && sudo ufw reset || echo "Aborted."
+ENTER

@@ -1,0 +1,4 @@
+REM Ejecutar netstat -ano con espera extendida
+DELAY 1500
+STRING netstat -ano
+ENTER

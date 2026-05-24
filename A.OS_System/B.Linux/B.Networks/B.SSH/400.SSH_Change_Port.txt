@@ -1,0 +1,4 @@
+REM Change SSH listening port in sshd_config
+DELAY 500
+STRING read -p "New SSH port number: " p; sudo sed -i "s/^#\?Port .*/Port $p/" /etc/ssh/sshd_config && sudo systemctl restart ssh && echo "SSH port changed to $p. Allow it in UFW: sudo ufw allow $p/tcp"
+ENTER

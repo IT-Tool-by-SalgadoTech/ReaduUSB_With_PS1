@@ -1,0 +1,4 @@
+REM Allow incoming connections on a port (iptables)
+DELAY 500
+STRING read -p "Port to allow: " p; read -p "Protocol (tcp/udp): " proto; sudo iptables -A INPUT -p "$proto" --dport "$p" -j ACCEPT && echo "Port $p/$proto allowed in iptables."
+ENTER

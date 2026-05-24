@@ -1,0 +1,4 @@
+REM Nmap traceroute with service version detection
+DELAY 500
+STRING read -p "Target IP or hostname: " t; nmap -sV --traceroute "$t"
+ENTER

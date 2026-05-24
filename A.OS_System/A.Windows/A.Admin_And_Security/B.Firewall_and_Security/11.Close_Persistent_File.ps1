@@ -1,0 +1,24 @@
+Set-ExecutionPolicy Bypass -Scope Process -Force
+Write-Host ""
+Write-Host " _____ _____  _______ ____   ____  _     " -ForegroundColor Cyan
+Write-Host "|_   _|_   _||__   __/ __ \ / __ \| |    " -ForegroundColor Cyan
+Write-Host "  | |   | |     | | | |  | | |  | | |    " -ForegroundColor Cyan
+Write-Host "  | |   | |     | | | |  | | |  | | |    " -ForegroundColor Cyan
+Write-Host " _| |_  | |     | | | |__| | |__| | |___ " -ForegroundColor Cyan
+Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  ==================================================================" -ForegroundColor White
+Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
+Write-Host "  Script: 11.Close_Persistent_File.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0011" -ForegroundColor Cyan
+Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
+Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
+Write-Host "  Category: Windows > Firewall & Security" -ForegroundColor DarkCyan
+Write-Host "  Description: Force-deletes a file locked by another running process" -ForegroundColor DarkCyan
+Write-Host "  (c) 2025 SalgadoTech - All Rights Reserved" -ForegroundColor DarkCyan
+Write-Host "  Unauthorized distribution prohibited" -ForegroundColor DarkCyan
+Write-Host "  ==================================================================" -ForegroundColor White
+Write-Host ""
+
+$F=Read-Host 'Paste the FULL file path to delete, then press Enter';$T=$F;if($T -notmatch '^[\\]{2}\?[\\]'){$T='\\?\'+$T};try{[IO.File]::SetAttributes($T,[IO.FileAttributes]::Normal)}catch{};$deleted=$false;try{Remove-Item -LiteralPath $T -Force -ErrorAction Stop;Write-Host 'Deleted.';$deleted=$true}catch{};if(-not $deleted){$rm='using System; using System.Runtime.InteropServices; public static class RM{ [StructLayout(LayoutKind.Sequential)] public struct FT{ public uint dwLowDateTime; public uint dwHighDateTime;} [StructLayout(LayoutKind.Sequential)] public struct UP{ public int dwProcessId; public FT ProcessStartTime;} [StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)] public struct INFO{ public UP Process; [MarshalAs(UnmanagedType.ByValTStr, SizeConst=256)] public string App; [MarshalAs(UnmanagedType.ByValTStr, SizeConst=64)] public string Svc; public uint Type; public uint Status; public uint TSSessionId; [MarshalAs(UnmanagedType.Bool)] public bool Restartable;} [DllImport("rstrtmgr.dll", CharSet=CharSet.Unicode)] public static extern int RmStartSession(out uint h, int flags, string key); [DllImport("rstrtmgr.dll", CharSet=CharSet.Unicode)] public static extern int RmRegisterResources(uint h, uint nFiles, string[] files, uint nApps, IntPtr apps, uint nSvcs, string[] svcs); [DllImport("rstrtmgr.dll")] public static extern int RmGetList(uint h, out uint needed, ref uint got, [In,Out] INFO[] info, ref uint reasons); [DllImport("rstrtmgr.dll")] public static extern int RmEndSession(uint h);}';try{Add-Type -TypeDefinition $rm -ErrorAction SilentlyContinue|Out-Null}catch{};[uint32]$h=0;$key=[guid]::NewGuid().ToString();[void][RM]::RmStartSession([ref]$h,0,$key);[void][RM]::RmRegisterResources($h,1,@($T),0,[IntPtr]::Zero,0,$null);[uint32]$need=0;[uint32]$got=0;[uint32]$reasons=0;[void][RM]::RmGetList($h,[ref]$need,[ref]$got,$null,[ref]$reasons);$pids=@();if($need -gt 0){$arr=New-Object RM+INFO[] $need;$got=$need;[void][RM]::RmGetList($h,[ref]$need,[ref]$got,$arr,[ref]$reasons);$pids=$arr|Where-Object{$_.Process.dwProcessId -gt 0}|ForEach-Object{$_.Process.dwProcessId}|Select-Object -Unique};[void][RM]::RmEndSession($h);if($pids.Count -gt 0){foreach($procId in $pids){try{Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue}catch{}};Start-Sleep -Milliseconds 300};try{[IO.File]::SetAttributes($T,[IO.FileAttributes]::Normal)|Out-Null;Remove-Item -LiteralPath $T -Force -ErrorAction Stop;Write-Host 'Deleted after killing lockers.';$deleted=$true}catch{};if(-not $deleted){$mf='using System; using System.Runtime.InteropServices; public static class MoveDel{ [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)] public static extern bool MoveFileEx(string s,string d,int f);}';try{Add-Type -TypeDefinition $mf -ErrorAction SilentlyContinue|Out-Null}catch{};[void][MoveDel]::MoveFileEx($T,$null,4);$regPath='HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager';$val='PendingFileRenameOperations';$cur=(Get-ItemProperty -Path $regPath -Name $val -ErrorAction SilentlyContinue).$val;if(-not $cur){$cur=@()};$pfx=$T -replace '^[\\]{2}\?','\??';$new=$cur+@($pfx,'');Set-ItemProperty -Path $regPath -Name $val -Value $new;Write-Host 'Scheduled for deletion on next reboot.'}};Read-Host 'Press Enter to close'
+Read-Host "Presiona Enter para salir..."

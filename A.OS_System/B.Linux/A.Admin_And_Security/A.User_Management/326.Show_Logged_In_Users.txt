@@ -1,0 +1,4 @@
+REM Show currently logged in users
+DELAY 500
+STRING who -a
+ENTER

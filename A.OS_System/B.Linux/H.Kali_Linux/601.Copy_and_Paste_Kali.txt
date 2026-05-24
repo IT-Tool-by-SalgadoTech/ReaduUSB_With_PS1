@@ -1,0 +1,6 @@
+DELAY 800
+CTRL ALT T
+DELAY 2000
+STRING printf "Action (copy/move): "; read act; printf "Source path: "; read src; printf "Use same name? (y/n): "; read same; if [ "$same" = "n" ]; then printf "New name: "; read new; else new=$(basename "$src"); fi; printf "Destination path: "; read dst; if [ "$act" = "copy" ]; then cp -r "$src" "$dst/$new"; elif [ "$act" = "move" ]; then mv "$src" "$dst/$new"; else echo "Invalid action"; fi
+DELAY 1000
+ENTER

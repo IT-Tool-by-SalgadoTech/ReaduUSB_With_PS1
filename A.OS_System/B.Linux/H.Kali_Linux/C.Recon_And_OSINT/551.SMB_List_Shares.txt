@@ -1,0 +1,4 @@
+REM List SMB shares on a remote host (smbclient)
+DELAY 500
+STRING read -p "Target IP: " ip; smbclient -L "//$ip" -N 2>/dev/null
+ENTER

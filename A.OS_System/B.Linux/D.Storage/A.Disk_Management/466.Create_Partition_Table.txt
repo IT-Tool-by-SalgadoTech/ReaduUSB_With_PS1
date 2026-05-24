@@ -1,0 +1,4 @@
+REM Create a new GPT partition table on a disk (DESTRUCTIVE)
+DELAY 500
+STRING lsblk; read -p "Disk to partition (e.g. sdb - NOT a partition!): " d; read -p "Type WIPE $d to confirm: " c; [ "$c" = "WIPE $d" ] && sudo parted /dev/"$d" mklabel gpt && echo "GPT table created on /dev/$d" || echo "Aborted."
+ENTER

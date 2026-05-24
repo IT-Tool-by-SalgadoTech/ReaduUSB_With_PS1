@@ -1,0 +1,4 @@
+REM Copy SSH public key to a remote host for passwordless login
+DELAY 500
+STRING read -p "Username on remote host: " u; read -p "Remote host: " h; ssh-copy-id "$u@$h"
+ENTER

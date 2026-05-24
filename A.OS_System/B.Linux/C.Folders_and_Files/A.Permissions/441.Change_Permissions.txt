@@ -1,0 +1,4 @@
+REM Change file/folder permissions (chmod)
+DELAY 500
+STRING read -p "File/folder path: " f; read -p "Permissions (e.g. 755, 644, 777): " perm; sudo chmod -R "$perm" "$f" && echo "Permissions of $f set to $perm"
+ENTER

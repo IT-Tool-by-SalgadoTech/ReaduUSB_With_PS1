@@ -1,0 +1,4 @@
+REM Delete a UFW rule by number (run UFW_Status first to see rule numbers)
+DELAY 500
+STRING sudo ufw status numbered; read -p "Rule number to delete: " n; sudo ufw delete "$n"
+ENTER

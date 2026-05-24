@@ -1,0 +1,4 @@
+REM Live top-like CPU and RAM monitor (press q to exit)
+DELAY 500
+STRING top
+ENTER

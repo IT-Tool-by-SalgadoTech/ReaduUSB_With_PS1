@@ -1,0 +1,4 @@
+REM Scan for available WiFi networks
+DELAY 500
+STRING nmcli dev wifi list
+ENTER

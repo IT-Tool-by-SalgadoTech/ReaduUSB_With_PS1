@@ -1,0 +1,4 @@
+REM Full system info (OS, kernel, CPU, RAM, disk)
+DELAY 500
+STRING echo "=== OS ===" && cat /etc/os-release | grep -E "^NAME|^VERSION" && echo "" && echo "=== Kernel ===" && uname -a && echo "" && echo "=== CPU ===" && lscpu | grep -E "Model name|Cores|Threads" && echo "" && echo "=== RAM ===" && free -h && echo "" && echo "=== Disk ===" && df -h | grep -v tmpfs
+ENTER

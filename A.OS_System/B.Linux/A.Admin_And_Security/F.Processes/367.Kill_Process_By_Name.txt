@@ -1,0 +1,4 @@
+REM Kill all processes matching a name
+DELAY 500
+STRING read -p "Process name to kill: " p; sudo pkill "$p" && echo "Killed: $p" || echo "No process found: $p"
+ENTER

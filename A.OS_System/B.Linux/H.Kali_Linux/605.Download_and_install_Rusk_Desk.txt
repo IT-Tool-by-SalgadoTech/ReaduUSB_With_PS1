@@ -1,0 +1,5 @@
+DELAY 1500
+CTRL ALT T
+DELAY 2000
+STRING /bin/bash -lc 'cd "$HOME/Downloads" || exit 1; u=$(/usr/bin/curl -fsSL https://api.github.com/repos/rustdesk/rustdesk/releases/latest | /usr/bin/grep -oE "https://github.com/rustdesk/rustdesk/releases/download/[^\" ]+/rustdesk-[^\" ]*\.(deb)" | /usr/bin/grep -E "(amd64|x86_64)\.deb$" | /usr/bin/head -n1); [ -n "$u" ] || { echo "No encontré .deb amd64/x86_64 en el latest release."; exit 2; }; /usr/bin/curl -fL -o rustdesk_latest.deb "$u" && /usr/bin/sudo /usr/bin/apt install -y ./rustdesk_latest.deb'
+ENTER

@@ -1,0 +1,4 @@
+REM Show active connections with full info (ss + resolved hostnames)
+DELAY 500
+STRING sudo ss -tupn && echo "" && echo "=== Established Only ===" && sudo ss -tpn state established
+ENTER

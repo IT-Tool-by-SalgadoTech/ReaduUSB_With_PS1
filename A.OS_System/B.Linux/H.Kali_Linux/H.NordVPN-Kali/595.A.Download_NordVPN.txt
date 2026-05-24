@@ -1,0 +1,40 @@
+DELAY 800
+CTRL ALT T
+DELAY 2000
+STRINGLN #!/usr/bin/env bash
+set -e
+
+echo "== Installing NordVPN =="
+if command -v curl >/dev/null 2>&1; then
+    sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
+elif command -v wget >/dev/null 2>&1; then
+    sh <(wget -qO - https://downloads.nordcdn.com/apps/linux/install.sh)
+else
+    echo "Error: neither curl nor wget is installed."
+    exit 1
+fi
+
+echo
+echo "== Adding current user to nordvpn group =="
+sudo usermod -aG nordvpn "$USER"
+
+echo
+read -rsp "Paste your NordVPN token: " NORD_TOKEN
+echo
+
+echo
+echo "== If you just added the group, you must re-log or reboot before login works cleanly =="
+echo "Trying login now anyway..."
+
+nordvpn login --token "$NORD_TOKEN"
+
+echo
+echo "== Connected account =="
+nordvpn account
+
+echo
+echo "To connect now:"
+echo "  nordvpn connect"
+END_STRINGLN
+DELAY 1000
+ENTER

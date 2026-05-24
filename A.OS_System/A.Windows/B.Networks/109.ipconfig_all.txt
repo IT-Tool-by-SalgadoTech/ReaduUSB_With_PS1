@@ -1,0 +1,4 @@
+REM Ejecutar ipconfig /all con espera extendida
+DELAY 1500
+STRING ipconfig /all
+ENTER

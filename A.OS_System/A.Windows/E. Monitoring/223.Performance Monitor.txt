@@ -1,0 +1,6 @@
+REM Launch perfmon
+DELAY 1000
+GUI r
+DELAY 1000
+STRING perfmon
+ENTER

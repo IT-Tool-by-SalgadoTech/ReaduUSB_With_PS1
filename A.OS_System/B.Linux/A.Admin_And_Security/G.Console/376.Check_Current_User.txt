@@ -1,0 +1,4 @@
+REM Show current user and privileges
+DELAY 500
+STRING whoami && id
+ENTER

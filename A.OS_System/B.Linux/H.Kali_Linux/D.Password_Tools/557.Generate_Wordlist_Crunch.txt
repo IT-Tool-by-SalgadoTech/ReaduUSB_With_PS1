@@ -1,0 +1,4 @@
+REM Generate a custom wordlist with crunch (min/max length + charset)
+DELAY 500
+STRING read -p "Min length: " min; read -p "Max length: " max; read -p "Charset (e.g. abc123 or @,%^): " cs; read -p "Output file: " out; crunch "$min" "$max" "$cs" -o "$out" && echo "Wordlist saved to $out"
+ENTER

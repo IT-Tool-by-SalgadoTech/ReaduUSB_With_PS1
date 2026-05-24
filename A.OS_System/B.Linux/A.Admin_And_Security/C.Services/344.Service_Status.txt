@@ -1,0 +1,4 @@
+REM Check the status of a service
+DELAY 500
+STRING read -p "Service name: " s; sudo systemctl status "$s"
+ENTER
