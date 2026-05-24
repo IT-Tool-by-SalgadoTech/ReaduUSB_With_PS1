@@ -1,0 +1,4 @@
+REM Capture WiFi handshakes with airodump-ng (passive capture)
+DELAY 500
+STRING read -p "Monitor interface (e.g. wlan0mon): " i; read -p "Target BSSID (MAC of AP): " bssid; read -p "Channel: " ch; read -p "Output filename (no extension): " out; sudo airodump-ng -c "$ch" --bssid "$bssid" -w "$out" "$i"
+ENTER

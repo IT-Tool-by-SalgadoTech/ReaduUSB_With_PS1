@@ -1,0 +1,4 @@
+REM Install Nmap
+DELAY 500
+STRING sudo apt install -y nmap && echo "Nmap installed: $(nmap --version | head -1)"
+ENTER

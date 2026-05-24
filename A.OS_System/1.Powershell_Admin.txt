@@ -1,0 +1,11 @@
+REM Ejecutar netstat -ab desde PowerShell como administrador
+DELAY 1000
+GUI r
+DELAY 1000
+STRING powershell -Command "Start-Process powershell -Verb RunAs -WindowStyle Maximized"
+ENTER
+DELAY 4000
+LEFT
+ENTER
+
+

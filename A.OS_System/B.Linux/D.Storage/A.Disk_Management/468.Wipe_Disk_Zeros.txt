@@ -1,0 +1,4 @@
+REM Securely wipe a disk by writing zeros (SLOW, DESTRUCTIVE)
+DELAY 500
+STRING lsblk; read -p "Disk/partition to wipe (e.g. sdb): " d; read -p "Type WIPE $d to confirm: " c; [ "$c" = "WIPE $d" ] && sudo dd if=/dev/zero of=/dev/"$d" bs=4M status=progress && echo "Disk /dev/$d wiped." || echo "Aborted."
+ENTER

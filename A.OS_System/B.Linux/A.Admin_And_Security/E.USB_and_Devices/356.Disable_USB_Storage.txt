@@ -1,0 +1,4 @@
+REM Disable USB mass storage module (blocks USB drives from mounting)
+DELAY 500
+STRING read -p "Type DISABLE to confirm blocking USB storage: " c; [ "$c" = "DISABLE" ] && sudo modprobe -r usb_storage && echo "USB storage disabled." || echo "Aborted."
+ENTER

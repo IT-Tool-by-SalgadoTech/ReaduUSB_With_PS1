@@ -1,0 +1,4 @@
+REM Extract a .tar.gz archive
+DELAY 500
+STRING read -p "Archive path (.tar.gz): " arc; read -p "Destination folder: " d; mkdir -p "$d" && tar -xzf "$arc" -C "$d" && echo "Extracted to $d"
+ENTER

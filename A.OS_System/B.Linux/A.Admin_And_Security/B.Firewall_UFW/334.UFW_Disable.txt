@@ -1,0 +1,4 @@
+REM Disable UFW firewall
+DELAY 500
+STRING sudo ufw disable && echo "UFW disabled."
+ENTER

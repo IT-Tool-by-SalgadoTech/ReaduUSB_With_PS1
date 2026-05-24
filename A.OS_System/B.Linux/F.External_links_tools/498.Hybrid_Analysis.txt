@@ -1,0 +1,4 @@
+REM Open Hybrid Analysis - Malware Sandbox in default browser (Linux)
+DELAY 500
+STRING xdg-open https://hybrid-analysis.com/
+ENTER

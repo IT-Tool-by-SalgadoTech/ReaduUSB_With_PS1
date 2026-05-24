@@ -1,0 +1,4 @@
+REM Show nftables ruleset (newer Kali versions use nftables instead of iptables)
+DELAY 500
+STRING sudo nft list ruleset 2>/dev/null || echo "nftables not active or not installed."
+ENTER

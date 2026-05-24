@@ -1,0 +1,6 @@
+REM Launch firewall
+DELAY 1000
+GUI r
+DELAY 1000
+STRING control firewall.cpl
+ENTER

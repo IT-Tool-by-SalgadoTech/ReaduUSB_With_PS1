@@ -1,0 +1,4 @@
+REM Re-enable USB mass storage module
+DELAY 500
+STRING sudo modprobe usb_storage && echo "USB storage enabled."
+ENTER

@@ -1,0 +1,4 @@
+REM Scan for potentially suspicious listening ports and outbound connections
+DELAY 500
+STRING echo "=== Listening Ports ===" && sudo ss -tlnp && echo "" && echo "=== Established Outbound ===" && sudo ss -tnp state established | grep -v "127.0.0.1\|::1" && echo "" && echo "=== Unusual Autostart Services ===" && systemctl list-unit-files --type=service --state=enabled | grep -Ev "NetworkManager|ssh|cron|ufw|systemd|getty|dbus|accounts|gdm|lightdm|cups"
+ENTER

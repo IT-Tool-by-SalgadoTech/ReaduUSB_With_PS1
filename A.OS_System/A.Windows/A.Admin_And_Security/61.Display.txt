@@ -1,0 +1,6 @@
+REM Launch desk
+DELAY 1000
+GUI r
+DELAY 1000
+STRING desk.cpl
+ENTER

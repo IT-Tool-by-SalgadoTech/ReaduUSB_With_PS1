@@ -1,0 +1,4 @@
+REM Turn Bluetooth off
+DELAY 500
+STRING bluetoothctl power off && sudo systemctl stop bluetooth && echo "Bluetooth OFF."
+ENTER

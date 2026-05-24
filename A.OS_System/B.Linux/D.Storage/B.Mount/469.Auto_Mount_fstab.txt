@@ -1,0 +1,4 @@
+REM Add a partition to /etc/fstab for auto-mount on boot
+DELAY 500
+STRING lsblk -o NAME,UUID,FSTYPE; read -p "UUID of partition: " uuid; read -p "Mount point (e.g. /mnt/data): " mp; read -p "Filesystem type (ext4/ntfs/vfat): " fs; sudo mkdir -p "$mp"; echo "UUID=$uuid $mp $fs defaults 0 2" | sudo tee -a /etc/fstab && echo "Entry added to /etc/fstab"
+ENTER

@@ -1,0 +1,7 @@
+REM Limpieza extrema del TEMP con intento de forzar eliminación
+REM Tomar propiedad
+REM Conceder permisos
+REM Eliminar contenido
+DELAY 1500
+STRING takeown /f "$env:TEMP\*" /r /d y
+ENTER

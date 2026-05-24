@@ -1,0 +1,4 @@
+REM Restore original (permanent) MAC address on an interface
+DELAY 500
+STRING read -p "Interface (e.g. eth0): " i; sudo ip link set "$i" down && sudo macchanger -p "$i" && sudo ip link set "$i" up && echo "Original MAC restored on $i"
+ENTER

@@ -1,0 +1,4 @@
+REM Share a folder via Samba (basic setup, requires samba installed)
+DELAY 500
+STRING read -p "Folder to share: " dir; read -p "Share name: " sname; read -p "Samba username: " u; sudo apt install -y samba 2>/dev/null; echo -e "[$sname]\n   path = $dir\n   browseable = yes\n   writable = yes\n   valid users = $u" | sudo tee -a /etc/samba/smb.conf; sudo smbpasswd -a "$u"; sudo systemctl restart smbd && echo "Samba share '$sname' created."
+ENTER

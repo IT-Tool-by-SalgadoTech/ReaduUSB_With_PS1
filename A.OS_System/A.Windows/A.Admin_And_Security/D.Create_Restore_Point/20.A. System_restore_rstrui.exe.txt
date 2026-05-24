@@ -1,0 +1,6 @@
+REM Launch control_panel
+DELAY 1000
+GUI r
+DELAY 300
+STRING rstrui.exe
+ENTER

@@ -1,0 +1,4 @@
+REM Show last 50 authentication log entries (login attempts, sudo, SSH)
+DELAY 500
+STRING sudo journalctl -u ssh -u sudo -n 50 --no-pager 2>/dev/null || sudo tail -50 /var/log/auth.log
+ENTER

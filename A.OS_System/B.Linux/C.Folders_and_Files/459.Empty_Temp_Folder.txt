@@ -1,0 +1,4 @@
+REM Clear /tmp folder (removes only files older than 1 day)
+DELAY 500
+STRING sudo find /tmp -maxdepth 1 -mtime +1 -exec rm -rf {} \; && echo "Old /tmp files removed."
+ENTER

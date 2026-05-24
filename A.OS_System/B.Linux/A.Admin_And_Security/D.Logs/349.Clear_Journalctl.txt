@@ -1,0 +1,4 @@
+REM Clear journalctl logs older than 7 days
+DELAY 500
+STRING read -p "Type CLEAR to confirm: " c; [ "$c" = "CLEAR" ] && sudo journalctl --vacuum-time=7d && echo "Old logs removed." || echo "Aborted."
+ENTER

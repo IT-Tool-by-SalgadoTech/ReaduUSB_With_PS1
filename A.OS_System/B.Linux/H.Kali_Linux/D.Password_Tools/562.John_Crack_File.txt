@@ -1,0 +1,4 @@
+REM Crack password hashes from a file using John the Ripper
+DELAY 500
+STRING read -p "Hash file path: " f; read -p "Wordlist (Enter for default): " w; if [ -z "$w" ]; then john "$f"; else john "$f" --wordlist="$w"; fi
+ENTER

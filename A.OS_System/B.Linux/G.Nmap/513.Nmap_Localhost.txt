@@ -1,0 +1,4 @@
+REM Scan localhost for open ports and services
+DELAY 500
+STRING sudo nmap -sV -T4 localhost
+ENTER

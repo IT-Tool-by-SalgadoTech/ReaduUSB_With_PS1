@@ -1,0 +1,4 @@
+REM Check SSH server status and listening port
+DELAY 500
+STRING sudo systemctl status ssh --no-pager && echo "" && sudo ss -tlnp | grep sshd
+ENTER

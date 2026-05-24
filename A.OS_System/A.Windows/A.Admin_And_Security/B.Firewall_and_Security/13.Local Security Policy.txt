@@ -1,0 +1,6 @@
+REM Launch lusrmgr
+DELAY 1000
+GUI r
+DELAY 1000
+STRING secpol.msc
+ENTER

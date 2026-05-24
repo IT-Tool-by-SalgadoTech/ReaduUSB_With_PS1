@@ -1,0 +1,4 @@
+REM Show detailed disk info (model, serial, health)
+DELAY 500
+STRING read -p "Disk device (e.g. sda, nvme0n1): " d; sudo hdparm -I /dev/"$d" 2>/dev/null | head -20 || sudo lshw -class disk 2>/dev/null | head -30
+ENTER

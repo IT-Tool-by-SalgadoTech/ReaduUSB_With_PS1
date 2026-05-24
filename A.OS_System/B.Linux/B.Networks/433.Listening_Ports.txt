@@ -1,0 +1,4 @@
+REM Show only listening ports and associated processes
+DELAY 500
+STRING sudo ss -tlnp && echo "" && sudo ss -ulnp
+ENTER

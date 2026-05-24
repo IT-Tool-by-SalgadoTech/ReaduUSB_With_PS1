@@ -1,0 +1,4 @@
+REM Show WiFi adapter driver and hardware info
+DELAY 500
+STRING lspci | grep -i wireless; lsusb | grep -i wireless; iwconfig 2>/dev/null | grep -v "no wireless"
+ENTER

@@ -1,0 +1,4 @@
+REM Start Apache web server (useful for hosting payloads/files)
+DELAY 500
+STRING sudo systemctl start apache2 && echo "Apache started. Serving from /var/www/html" && sudo ss -tlnp | grep apache
+ENTER

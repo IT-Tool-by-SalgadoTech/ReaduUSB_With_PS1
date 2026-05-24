@@ -1,0 +1,4 @@
+REM Force logout a user by username (kills all their processes)
+DELAY 500
+STRING read -p "Username to logout: " u; sudo pkill -KILL -u "$u" && echo "User $u logged out."
+ENTER

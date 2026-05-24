@@ -1,0 +1,4 @@
+REM Show logs for a specific service
+DELAY 500
+STRING read -p "Service name: " s; sudo journalctl -u "$s" -n 50 --no-pager
+ENTER

@@ -1,0 +1,4 @@
+REM Launch Burp Suite Community Edition
+DELAY 500
+STRING burpsuite & 2>/dev/null || java -jar /usr/bin/burpsuite 2>/dev/null || echo "Burp Suite not found. Run: sudo apt install burpsuite"
+ENTER

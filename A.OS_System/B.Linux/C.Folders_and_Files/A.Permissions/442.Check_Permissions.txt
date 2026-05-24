@@ -1,0 +1,4 @@
+REM Check permissions of a file or folder
+DELAY 500
+STRING read -p "File/folder path: " f; ls -la "$f"
+ENTER

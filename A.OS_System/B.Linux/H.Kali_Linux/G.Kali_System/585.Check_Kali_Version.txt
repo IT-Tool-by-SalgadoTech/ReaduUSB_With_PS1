@@ -1,0 +1,4 @@
+REM Show Kali Linux version and kernel info
+DELAY 500
+STRING cat /etc/os-release && echo "" && uname -a
+ENTER

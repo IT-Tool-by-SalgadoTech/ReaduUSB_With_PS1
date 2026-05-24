@@ -1,0 +1,4 @@
+REM Unlock a user account
+DELAY 500
+STRING read -p "Username to unlock: " u; sudo usermod -U "$u" && echo "Account $u unlocked."
+ENTER

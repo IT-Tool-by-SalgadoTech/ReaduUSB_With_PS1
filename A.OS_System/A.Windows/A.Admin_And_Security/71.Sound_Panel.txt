@@ -1,0 +1,6 @@
+REM Launch mmsys
+DELAY 1000
+GUI r
+DELAY 800
+STRING mmsys.cpl
+ENTER

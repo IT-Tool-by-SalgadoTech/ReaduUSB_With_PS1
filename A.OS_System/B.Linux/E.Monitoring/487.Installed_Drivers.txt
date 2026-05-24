@@ -1,0 +1,4 @@
+REM List loaded kernel modules (drivers)
+DELAY 500
+STRING lsmod | sort
+ENTER

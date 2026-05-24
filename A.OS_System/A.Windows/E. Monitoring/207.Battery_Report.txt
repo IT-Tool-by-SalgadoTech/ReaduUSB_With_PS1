@@ -1,0 +1,4 @@
+REM Ejecutar netstat -ab desde PowerShell como administrador
+DELAY 1500
+STRING powercfg /batteryreport /output "$env:USERPROFILE\Desktop\battery-report.html"
+ENTER

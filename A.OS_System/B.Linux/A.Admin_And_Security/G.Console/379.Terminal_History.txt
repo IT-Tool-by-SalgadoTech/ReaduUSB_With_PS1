@@ -1,0 +1,4 @@
+REM Show last 50 commands from bash history
+DELAY 500
+STRING history | tail -50
+ENTER

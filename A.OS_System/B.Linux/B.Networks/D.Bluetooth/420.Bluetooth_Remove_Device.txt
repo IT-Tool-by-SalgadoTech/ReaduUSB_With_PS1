@@ -1,0 +1,4 @@
+REM Remove/unpair a Bluetooth device
+DELAY 500
+STRING read -p "Device MAC to remove: " mac; bluetoothctl remove "$mac" && echo "Device $mac removed."
+ENTER

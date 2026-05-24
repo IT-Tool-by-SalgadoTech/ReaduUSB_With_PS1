@@ -1,0 +1,4 @@
+REM Show all open ports with owning process (requires ss)
+DELAY 500
+STRING sudo ss -tulnp
+ENTER

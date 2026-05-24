@@ -1,0 +1,4 @@
+REM Show WiFi interface status and connected network
+DELAY 500
+STRING nmcli device status && echo "" && nmcli connection show --active
+ENTER

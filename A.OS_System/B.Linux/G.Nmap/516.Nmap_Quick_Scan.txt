@@ -1,0 +1,4 @@
+REM Quick scan of a host (top 1000 ports)
+DELAY 500
+STRING read -p "Target IP or hostname: " t; nmap -T4 "$t"
+ENTER

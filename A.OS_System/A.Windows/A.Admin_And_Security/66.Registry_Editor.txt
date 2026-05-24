@@ -1,0 +1,8 @@
+REM Launch regedit
+DELAY 1000
+GUI r
+DELAY 1000
+STRING regedit
+ENTER
+DELAY 1500
+ALT y

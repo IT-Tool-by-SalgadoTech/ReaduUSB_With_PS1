@@ -1,0 +1,4 @@
+REM Ping a host (4 packets)
+DELAY 500
+STRING read -p "Enter IP or hostname to ping: " h; ping -c 4 "$h"
+ENTER

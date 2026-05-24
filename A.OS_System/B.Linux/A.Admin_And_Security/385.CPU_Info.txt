@@ -1,0 +1,4 @@
+REM Show CPU model, cores, and architecture info
+DELAY 500
+STRING lscpu | grep -E "Model name|Architecture|CPU\(s\)|Thread|Core|Socket|MHz|Virtualization"
+ENTER

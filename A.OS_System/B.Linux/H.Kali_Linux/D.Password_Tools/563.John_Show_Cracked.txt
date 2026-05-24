@@ -1,0 +1,4 @@
+REM Show already cracked passwords from John the Ripper pot file
+DELAY 500
+STRING read -p "Hash file path: " f; john "$f" --show
+ENTER

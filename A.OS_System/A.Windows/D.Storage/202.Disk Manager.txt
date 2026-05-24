@@ -1,0 +1,6 @@
+REM Launch diskmgmt
+DELAY 1000
+GUI r
+DELAY 800
+STRING diskmgmt.msc
+ENTER

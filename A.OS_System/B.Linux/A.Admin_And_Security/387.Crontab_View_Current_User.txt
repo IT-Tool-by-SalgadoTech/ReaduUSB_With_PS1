@@ -1,0 +1,4 @@
+REM View crontab for the current user
+DELAY 500
+STRING crontab -l 2>/dev/null || echo "No crontab for current user."
+ENTER

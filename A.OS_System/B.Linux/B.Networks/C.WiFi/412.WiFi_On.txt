@@ -1,0 +1,4 @@
+REM Turn WiFi on
+DELAY 500
+STRING nmcli radio wifi on && echo "WiFi enabled."
+ENTER

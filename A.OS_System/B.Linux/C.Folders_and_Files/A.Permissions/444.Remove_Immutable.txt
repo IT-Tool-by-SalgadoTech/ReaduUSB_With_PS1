@@ -1,0 +1,4 @@
+REM Remove immutable attribute from a file
+DELAY 500
+STRING read -p "File path: " f; sudo chattr -i "$f" && echo "Immutable attribute removed from $f"
+ENTER

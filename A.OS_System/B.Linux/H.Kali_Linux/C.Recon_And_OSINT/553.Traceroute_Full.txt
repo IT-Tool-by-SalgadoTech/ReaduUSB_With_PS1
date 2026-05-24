@@ -1,0 +1,4 @@
+REM Traceroute with DNS resolution and detailed hops
+DELAY 500
+STRING read -p "Target IP or domain: " t; sudo traceroute -I "$t" 2>/dev/null || traceroute "$t"
+ENTER

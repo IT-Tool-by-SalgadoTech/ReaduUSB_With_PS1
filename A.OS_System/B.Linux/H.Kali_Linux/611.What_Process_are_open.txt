@@ -1,0 +1,7 @@
+DELAY 1500
+CTRL ALT T
+DELAY 2000
+STRING ( [ -x /usr/bin/ps ] && PS=/usr/bin/ps || PS=/bin/ps; [ -x /usr/bin/head ] && H=/usr/bin/head || H=/bin/head; "$PS" -e -o pid,user,%cpu,%mem,etimes,cmd --sort=-%cpu | "$H" -n 16; echo; echo "==== Tip: monitor en vivo ===="; echo "En vivo por CPU:  /bin/top -o %CPU"; echo "En vivo por RAM:  /bin/top -o %MEM" )
+ENTER
+DELAY 1800
+ENTER

@@ -1,0 +1,4 @@
+REM Add a cron job for the current user
+DELAY 500
+STRING echo "Format: minute hour day month weekday command"; echo "Example: 0 2 * * * /home/user/backup.sh"; read -p "Cron expression + command: " job; (crontab -l 2>/dev/null; echo "$job") | crontab - && echo "Cron job added."
+ENTER

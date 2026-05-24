@@ -1,0 +1,4 @@
+REM Run a CLI speed test (requires speedtest-cli)
+DELAY 500
+STRING speedtest-cli 2>/dev/null || python3 -m speedtest 2>/dev/null || echo "speedtest-cli not installed. Run: sudo apt install speedtest-cli"
+ENTER

@@ -1,0 +1,4 @@
+REM Find files modified in the last N minutes
+DELAY 500
+STRING read -p "Minutes ago: " m; read -p "Directory (Enter for current): " d; find "${d:-.}" -type f -mmin -"$m" 2>/dev/null
+ENTER

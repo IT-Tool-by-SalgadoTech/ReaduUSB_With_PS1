@@ -1,0 +1,4 @@
+REM Restart NetworkManager (useful after airmon-ng killed it)
+DELAY 500
+STRING sudo service NetworkManager restart && sudo service wpa_supplicant restart && echo "NetworkManager restarted."
+ENTER

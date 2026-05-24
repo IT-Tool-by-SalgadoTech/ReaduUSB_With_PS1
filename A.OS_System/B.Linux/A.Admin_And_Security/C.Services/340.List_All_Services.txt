@@ -1,0 +1,4 @@
+REM List all systemd services and their status
+DELAY 500
+STRING sudo systemctl list-units --type=service --all
+ENTER

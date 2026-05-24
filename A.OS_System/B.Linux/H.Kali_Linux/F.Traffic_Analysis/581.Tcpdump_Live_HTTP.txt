@@ -1,0 +1,4 @@
+REM Live capture of HTTP traffic (port 80) showing content
+DELAY 500
+STRING read -p "Interface (e.g. eth0): " i; sudo tcpdump -i "$i" -A -s 0 'tcp port 80' 2>/dev/null
+ENTER

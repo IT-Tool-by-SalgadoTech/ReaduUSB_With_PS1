@@ -1,0 +1,4 @@
+REM Enable UFW firewall
+DELAY 500
+STRING sudo ufw enable && echo "UFW enabled."
+ENTER
