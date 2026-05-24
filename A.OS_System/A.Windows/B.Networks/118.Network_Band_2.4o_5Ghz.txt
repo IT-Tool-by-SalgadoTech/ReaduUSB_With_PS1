@@ -1,3 +1,0 @@
-DELAY 1500
-STRING netsh wlan show networks mode=bssid
-ENTER

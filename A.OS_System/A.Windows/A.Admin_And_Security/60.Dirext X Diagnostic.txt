@@ -1,6 +1,0 @@
-REM Launch dxdiag
-DELAY 1000
-GUI r
-DELAY 1000
-STRING dxdiag
-ENTER

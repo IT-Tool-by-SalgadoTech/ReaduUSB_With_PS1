@@ -1,3 +1,0 @@
-DELAY 1000
-STRING netsh wlan show drivers
-ENTER

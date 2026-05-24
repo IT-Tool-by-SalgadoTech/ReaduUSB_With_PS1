@@ -1,6 +1,0 @@
-REM Abrir VirusTotal desde el menú Ejecutar (Windows + R)
-DELAY 1000
-WINDOWS r
-DELAY 1000
-STRING https://haveibeenpwned.com/
-ENTER

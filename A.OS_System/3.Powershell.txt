@@ -1,6 +1,0 @@
-REM Launch powershell
-DELAY 1000
-GUI r
-DELAY 1000
-STRING powershell -Command "Start-Process powershell -WindowStyle Maximized"
-ENTER

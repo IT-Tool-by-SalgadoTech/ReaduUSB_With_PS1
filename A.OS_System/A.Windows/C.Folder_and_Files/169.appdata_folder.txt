@@ -1,6 +1,0 @@
-REM Launch appdata_folder
-DELAY 1000
-GUI r
-DELAY 800
-STRING %appdata%
-ENTER

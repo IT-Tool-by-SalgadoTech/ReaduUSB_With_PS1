@@ -1,4 +1,0 @@
-REM Ejecutar getmac /v /fo list con espera extendida
-DELAY 1500
-STRING getmac /v /fo list
-ENTER

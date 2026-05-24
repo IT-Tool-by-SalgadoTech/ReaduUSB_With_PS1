@@ -1,3 +1,0 @@
-DELAY 1000
-STRING net share
-ENTER

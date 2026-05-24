@@ -1,3 +1,0 @@
-DELAY 1000
-STRING winget install -e --id Insecure.Nmap
-ENTER

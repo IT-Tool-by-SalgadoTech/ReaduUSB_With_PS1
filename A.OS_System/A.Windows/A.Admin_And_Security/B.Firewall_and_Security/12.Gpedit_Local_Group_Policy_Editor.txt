@@ -1,6 +1,0 @@
-REM Launch gpedit
-DELAY 1000
-GUI r
-DELAY 1000
-STRING gpedit.msc
-ENTER

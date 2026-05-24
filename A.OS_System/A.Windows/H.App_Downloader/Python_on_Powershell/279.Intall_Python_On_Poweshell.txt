@@ -1,4 +1,0 @@
-DELAY 1000
-STRING winget install --id Python.Python.3.13 -e --source winget --accept-source-agreements --accept-package-agreements
-DELAY 1500
-ENTER

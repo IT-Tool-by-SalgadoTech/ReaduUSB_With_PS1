@@ -1,3 +1,0 @@
-DELAY 1500
-STRING query user
-ENTER 

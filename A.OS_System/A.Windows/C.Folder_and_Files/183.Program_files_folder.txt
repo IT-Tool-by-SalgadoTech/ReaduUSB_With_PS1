@@ -1,6 +1,0 @@
-REM Launch programfiles_folder
-DELAY 1000
-GUI r
-DELAY 800
-STRING %programfiles%
-ENTER
