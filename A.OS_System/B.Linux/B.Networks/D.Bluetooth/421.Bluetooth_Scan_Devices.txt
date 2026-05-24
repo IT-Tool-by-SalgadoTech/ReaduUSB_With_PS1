@@ -1,4 +1,0 @@
-REM Scan for nearby Bluetooth devices (10 seconds)
-DELAY 500
-STRING bluetoothctl --timeout 10 scan on
-ENTER

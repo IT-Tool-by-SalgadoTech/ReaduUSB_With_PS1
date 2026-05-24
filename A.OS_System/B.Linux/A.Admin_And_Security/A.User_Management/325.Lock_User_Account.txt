@@ -1,4 +1,0 @@
-REM Lock a user account (prevent login)
-DELAY 500
-STRING read -p "Username to lock: " u; sudo usermod -L "$u" && echo "Account $u locked."
-ENTER

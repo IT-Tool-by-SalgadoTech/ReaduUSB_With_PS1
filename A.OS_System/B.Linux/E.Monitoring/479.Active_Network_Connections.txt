@@ -1,4 +1,0 @@
-REM Show all active network connections with process names
-DELAY 500
-STRING sudo ss -tupn
-ENTER

@@ -1,4 +1,0 @@
-REM Disable a service from starting on boot
-DELAY 500
-STRING read -p "Service name: " s; sudo systemctl disable "$s" && echo "Service $s disabled from boot."
-ENTER

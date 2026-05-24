@@ -1,4 +1,0 @@
-REM Show free disk space on all mounted filesystems
-DELAY 500
-STRING df -hT | grep -v tmpfs
-ENTER

@@ -1,4 +1,0 @@
-REM Show ARP table (IP to MAC mappings on LAN)
-DELAY 500
-STRING arp -n
-ENTER

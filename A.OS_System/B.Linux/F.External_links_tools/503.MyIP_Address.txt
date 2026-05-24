@@ -1,4 +1,0 @@
-REM Open What Is My IP Address in default browser (Linux)
-DELAY 500
-STRING xdg-open https://whatismyipaddress.com/
-ENTER

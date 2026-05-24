@@ -1,6 +1,0 @@
-REM Launch msconfig
-DELAY 1000
-GUI r
-DELAY 1000
-STRING msconfig
-ENTER

@@ -1,4 +1,0 @@
-REM Block incoming connections on a port (iptables)
-DELAY 500
-STRING read -p "Port to block: " p; read -p "Protocol (tcp/udp): " proto; sudo iptables -A INPUT -p "$proto" --dport "$p" -j DROP && echo "Port $p/$proto blocked in iptables."
-ENTER

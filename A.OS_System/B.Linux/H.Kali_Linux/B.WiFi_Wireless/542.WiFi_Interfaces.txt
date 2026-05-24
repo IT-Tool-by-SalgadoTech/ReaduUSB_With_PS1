@@ -1,4 +1,0 @@
-REM List all wireless interfaces and their status (iwconfig)
-DELAY 500
-STRING iwconfig 2>/dev/null | grep -v "no wireless"
-ENTER

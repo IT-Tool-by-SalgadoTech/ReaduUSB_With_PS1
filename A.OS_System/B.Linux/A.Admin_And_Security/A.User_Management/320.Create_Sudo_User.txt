@@ -1,4 +1,0 @@
-REM Create a new user and add to sudo group
-DELAY 500
-STRING read -p "New username: " u; sudo useradd -m -s /bin/bash "$u" && sudo passwd "$u" && sudo usermod -aG sudo "$u" && echo "Sudo user $u created."
-ENTER

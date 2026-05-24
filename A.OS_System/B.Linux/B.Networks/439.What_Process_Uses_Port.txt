@@ -1,4 +1,0 @@
-REM Find which process is using a specific port
-DELAY 500
-STRING read -p "Port number: " p; sudo ss -tlnp | grep ":$p " || sudo lsof -i :"$p" 2>/dev/null
-ENTER

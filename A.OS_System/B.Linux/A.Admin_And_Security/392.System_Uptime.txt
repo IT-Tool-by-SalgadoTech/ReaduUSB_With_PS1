@@ -1,4 +1,0 @@
-REM Show system uptime and load averages
-DELAY 500
-STRING uptime -p && uptime
-ENTER

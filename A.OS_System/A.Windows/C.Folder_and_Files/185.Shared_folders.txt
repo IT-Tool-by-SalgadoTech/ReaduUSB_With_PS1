@@ -1,5 +1,0 @@
-DELAY 500
-GUI r
-DELAY 800
-STRING fsmgmt.msc
-ENTER

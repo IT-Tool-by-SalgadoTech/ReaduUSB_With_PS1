@@ -1,6 +1,0 @@
-REM Launch localhost
-DELAY 1000
-GUI r
-DELAY 800
-STRING \\localhost
-ENTER

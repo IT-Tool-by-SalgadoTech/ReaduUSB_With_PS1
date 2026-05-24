@@ -1,4 +1,0 @@
-REM Show BIOS/UEFI information
-DELAY 500
-STRING sudo dmidecode -t bios 2>/dev/null | head -30 || echo "dmidecode not installed. Run: sudo apt install dmidecode"
-ENTER

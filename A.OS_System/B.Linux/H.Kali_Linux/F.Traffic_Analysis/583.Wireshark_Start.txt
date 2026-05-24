@@ -1,4 +1,0 @@
-REM Start Wireshark GUI (requires display)
-DELAY 500
-STRING sudo wireshark & 2>/dev/null || echo "Wireshark not installed. Run: sudo apt install wireshark"
-ENTER

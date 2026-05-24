@@ -1,4 +1,0 @@
-REM Show TX/RX bytes and errors for all network interfaces
-DELAY 500
-STRING cat /proc/net/dev | column -t
-ENTER

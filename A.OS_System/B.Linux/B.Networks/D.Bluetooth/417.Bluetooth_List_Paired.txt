@@ -1,4 +1,0 @@
-REM List all paired Bluetooth devices
-DELAY 500
-STRING bluetoothctl paired-devices
-ENTER

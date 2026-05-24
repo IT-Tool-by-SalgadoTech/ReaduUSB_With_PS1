@@ -1,4 +1,0 @@
-REM Save current iptables rules so they persist after reboot
-DELAY 500
-STRING sudo apt install -y iptables-persistent 2>/dev/null; sudo netfilter-persistent save && echo "iptables rules saved (will persist on reboot)."
-ENTER

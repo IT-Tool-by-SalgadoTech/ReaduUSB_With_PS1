@@ -1,4 +1,0 @@
-REM Identify web technologies on a target website
-DELAY 500
-STRING read -p "Target URL (e.g. https://example.com): " u; whatweb "$u" 2>/dev/null || echo "whatweb not installed. Run: sudo apt install whatweb"
-ENTER

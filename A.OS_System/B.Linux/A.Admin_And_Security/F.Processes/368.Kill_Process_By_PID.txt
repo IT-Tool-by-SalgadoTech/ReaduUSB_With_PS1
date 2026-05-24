@@ -1,4 +1,0 @@
-REM Kill a process by PID
-DELAY 500
-STRING read -p "PID to kill: " pid; sudo kill -9 "$pid" && echo "Process $pid killed." || echo "Could not kill PID $pid"
-ENTER

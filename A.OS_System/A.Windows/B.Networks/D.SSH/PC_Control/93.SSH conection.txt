@@ -1,3 +1,0 @@
-DELAY 1500
-STRING ssh ("{0}@{1}" -f (Read-Host "Enter the SSH username"), (Read-Host "Enter the IP address or hostname"))
-ENTER

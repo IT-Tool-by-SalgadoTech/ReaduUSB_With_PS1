@@ -1,4 +1,0 @@
-REM Open DNS Leak Test in default browser (Linux)
-DELAY 500
-STRING xdg-open https://dnsleaktest.com/
-ENTER

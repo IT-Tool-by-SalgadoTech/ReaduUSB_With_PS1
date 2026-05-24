@@ -1,4 +1,0 @@
-REM Extract a .zip file
-DELAY 500
-STRING read -p "Zip file path: " z; read -p "Destination folder: " d; unzip "$z" -d "$d" && echo "Extracted to $d"
-ENTER

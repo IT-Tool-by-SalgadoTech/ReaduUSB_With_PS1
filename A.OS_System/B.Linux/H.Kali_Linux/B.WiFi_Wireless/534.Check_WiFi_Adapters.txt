@@ -1,4 +1,0 @@
-REM Check which WiFi adapters support monitor mode and injection
-DELAY 500
-STRING sudo airmon-ng
-ENTER

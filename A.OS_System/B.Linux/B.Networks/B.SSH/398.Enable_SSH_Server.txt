@@ -1,4 +1,0 @@
-REM Install and enable OpenSSH server
-DELAY 500
-STRING sudo apt install -y openssh-server && sudo systemctl enable ssh && sudo systemctl start ssh && echo "SSH server enabled and running."
-ENTER

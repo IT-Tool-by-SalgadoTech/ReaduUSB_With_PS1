@@ -1,4 +1,0 @@
-REM Enable monitor mode on a wireless interface (for packet capture)
-DELAY 500
-STRING read -p "Interface (e.g. wlan0): " i; sudo ip link set "$i" down && sudo iwconfig "$i" mode monitor && sudo ip link set "$i" up && iwconfig "$i" | grep Mode && echo "Monitor mode enabled on $i"
-ENTER

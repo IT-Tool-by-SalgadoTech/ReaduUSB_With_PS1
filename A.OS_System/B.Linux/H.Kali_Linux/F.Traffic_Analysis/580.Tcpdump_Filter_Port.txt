@@ -1,4 +1,0 @@
-REM Capture traffic on a specific port
-DELAY 500
-STRING read -p "Interface: " i; read -p "Port: " p; sudo tcpdump -i "$i" port "$p" -n
-ENTER

@@ -1,4 +1,0 @@
-REM Live network bandwidth monitor (requires nload)
-DELAY 500
-STRING nload 2>/dev/null || iftop 2>/dev/null || echo "Install nload: sudo apt install nload"
-ENTER

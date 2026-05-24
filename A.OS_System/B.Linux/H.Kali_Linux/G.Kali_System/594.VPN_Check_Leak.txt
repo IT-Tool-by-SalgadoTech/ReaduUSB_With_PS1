@@ -1,4 +1,0 @@
-REM Check for DNS leaks and confirm VPN is working
-DELAY 500
-STRING echo "=== Public IP ===" && curl -s https://api.ipify.org && echo "" && echo "=== DNS Servers in use ===" && cat /etc/resolv.conf && echo "" && echo "=== Active Interfaces ===" && ip addr show | grep "inet " | grep -v 127
-ENTER

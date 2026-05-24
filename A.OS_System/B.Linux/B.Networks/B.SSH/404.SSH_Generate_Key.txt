@@ -1,4 +1,0 @@
-REM Generate a new SSH RSA key pair (4096 bits)
-DELAY 500
-STRING read -p "Key filename (Enter for default ~/.ssh/id_rsa): " f; ssh-keygen -t rsa -b 4096 ${f:+-f "$f"}
-ENTER

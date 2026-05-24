@@ -1,6 +1,0 @@
-REM Launch appwiz
-DELAY 1000
-GUI r
-DELAY 1000
-STRING appwiz.cpl
-ENTER

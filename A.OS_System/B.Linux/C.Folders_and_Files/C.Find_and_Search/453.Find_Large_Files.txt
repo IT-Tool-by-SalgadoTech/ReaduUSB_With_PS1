@@ -1,4 +1,0 @@
-REM Find files larger than a specified size
-DELAY 500
-STRING read -p "Minimum size (e.g. 100M, 1G): " s; read -p "Search in directory (Enter for /home): " d; sudo find "${d:-/home}" -type f -size +"$s" -exec ls -lh {} \; 2>/dev/null | sort -k5 -rh | head -20
-ENTER

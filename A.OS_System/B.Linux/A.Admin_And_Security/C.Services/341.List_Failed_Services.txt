@@ -1,4 +1,0 @@
-REM Show all failed services
-DELAY 500
-STRING sudo systemctl --failed
-ENTER

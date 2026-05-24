@@ -1,4 +1,0 @@
-REM Identify the type of a hash using hashid or hashcat
-DELAY 500
-STRING read -p "Hash to identify: " h; hashid "$h" 2>/dev/null || python3 -c "import subprocess; subprocess.run(['hashcat', '--identify', '$h'])" 2>/dev/null || echo "hashid not installed. Run: sudo apt install hashid"
-ENTER

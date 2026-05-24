@@ -1,4 +1,0 @@
-REM Disconnect from current WiFi network
-DELAY 500
-STRING read -p "WiFi interface (e.g. wlan0): " i; nmcli dev disconnect "$i" && echo "Disconnected $i"
-ENTER

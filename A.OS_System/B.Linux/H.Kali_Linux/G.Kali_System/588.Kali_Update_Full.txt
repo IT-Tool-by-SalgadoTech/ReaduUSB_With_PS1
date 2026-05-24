@@ -1,4 +1,0 @@
-REM Full Kali system update (apt update + full-upgrade + autoremove)
-DELAY 500
-STRING sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y && echo "Kali fully updated."
-ENTER

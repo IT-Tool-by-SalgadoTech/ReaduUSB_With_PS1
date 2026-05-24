@@ -1,4 +1,0 @@
-REM Enable a service to start on boot
-DELAY 500
-STRING read -p "Service name: " s; sudo systemctl enable "$s" && echo "Service $s enabled on boot."
-ENTER

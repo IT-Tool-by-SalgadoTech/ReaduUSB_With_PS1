@@ -1,4 +1,0 @@
-REM Show top IPs by packet count from a pcap file (tshark)
-DELAY 500
-STRING read -p "PCAP file path: " f; tshark -r "$f" -q -z conv,ip 2>/dev/null | head -20 || echo "tshark not installed. Run: sudo apt install tshark"
-ENTER

@@ -1,4 +1,0 @@
-REM Interactive live process monitor (htop or top)
-DELAY 500
-STRING htop 2>/dev/null || top
-ENTER

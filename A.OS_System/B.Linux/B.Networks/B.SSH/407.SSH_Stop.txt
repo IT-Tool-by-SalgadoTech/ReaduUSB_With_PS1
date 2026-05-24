@@ -1,4 +1,0 @@
-REM Stop SSH server
-DELAY 500
-STRING sudo systemctl stop ssh && echo "SSH server stopped."
-ENTER

@@ -1,4 +1,0 @@
-REM Traceroute to a host
-DELAY 500
-STRING read -p "Enter IP or hostname for traceroute: " h; traceroute "$h" 2>/dev/null || tracepath "$h"
-ENTER

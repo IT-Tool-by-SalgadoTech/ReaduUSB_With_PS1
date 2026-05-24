@@ -1,6 +1,0 @@
-REM Launch ncpa
-DELAY 1000
-GUI r
-DELAY 1000
-STRING ncpa.cpl
-ENTER

@@ -1,3 +1,0 @@
-DELAY 1800
-STRING fsutil behavior set disablelastaccess 2
-ENTER

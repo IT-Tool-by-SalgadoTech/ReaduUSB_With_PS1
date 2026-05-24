@@ -1,4 +1,0 @@
-REM Unmount a device safely
-DELAY 500
-STRING df -h; read -p "Mount point or device to unmount (e.g. /mnt/usb): " d; sudo umount "$d" && echo "Unmounted $d"
-ENTER

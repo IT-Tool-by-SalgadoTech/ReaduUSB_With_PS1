@@ -1,4 +1,0 @@
-REM Show network connections for a specific process name
-DELAY 500
-STRING read -p "Process name: " p; sudo ss -tupn | grep "$p"
-ENTER

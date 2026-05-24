@@ -1,4 +1,0 @@
-REM Open Social Engineering Toolkit (SET)
-DELAY 500
-STRING sudo setoolkit 2>/dev/null || sudo python3 /usr/share/set/setoolkit 2>/dev/null || echo "SET not installed. Run: sudo apt install set"
-ENTER

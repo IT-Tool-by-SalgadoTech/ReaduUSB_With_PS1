@@ -1,4 +1,0 @@
-REM Show all iptables rules: INPUT, OUTPUT, FORWARD chains
-DELAY 500
-STRING sudo iptables -L -n -v --line-numbers && echo "" && sudo iptables -t nat -L -n -v --line-numbers
-ENTER

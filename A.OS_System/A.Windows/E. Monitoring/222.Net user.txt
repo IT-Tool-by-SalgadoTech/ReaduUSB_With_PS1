@@ -1,4 +1,0 @@
-REM Abrir CMD como administrador
-DELAY 1000
-STRING net user
-ENTER

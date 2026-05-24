@@ -1,4 +1,0 @@
-REM Detect operating system of target (requires root)
-DELAY 500
-STRING read -p "Target IP or hostname: " t; sudo nmap -O "$t"
-ENTER

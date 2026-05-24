@@ -1,3 +1,0 @@
-DELAY 1000
-STRING "%ProgramFiles%\Windows Defender\MpCmdRun.exe" -Scan -ScanType 2
-ENTER

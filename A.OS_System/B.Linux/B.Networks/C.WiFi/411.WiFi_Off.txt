@@ -1,4 +1,0 @@
-REM Turn WiFi off
-DELAY 500
-STRING nmcli radio wifi off && echo "WiFi disabled."
-ENTER

@@ -1,4 +1,0 @@
-DELAY 1000
-STRING python --version
-DELAY 1500
-ENTER

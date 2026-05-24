@@ -1,4 +1,0 @@
-REM Show VID:PID for all connected USB devices
-DELAY 500
-STRING lsusb | awk '{print $6, $7}'
-ENTER

@@ -1,4 +1,0 @@
-REM Create a .tar.gz archive
-DELAY 500
-STRING read -p "Source file/folder: " src; read -p "Output archive name (no extension): " out; tar -czf "${out}.tar.gz" "$src" && echo "Created ${out}.tar.gz"
-ENTER

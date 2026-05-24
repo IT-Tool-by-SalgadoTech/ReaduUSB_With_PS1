@@ -1,6 +1,0 @@
-REM Launch resmon
-DELAY 1000
-GUI r
-DELAY 1000
-STRING resmon
-ENTER

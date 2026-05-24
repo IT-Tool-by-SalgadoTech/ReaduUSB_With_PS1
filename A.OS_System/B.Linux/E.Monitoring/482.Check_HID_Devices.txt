@@ -1,4 +1,0 @@
-REM List HID (Human Interface Devices - keyboards, mice, gamepads)
-DELAY 500
-STRING ls /dev/input/ && echo "" && cat /proc/bus/input/devices | grep -E "Name|Handlers|Phys"
-ENTER

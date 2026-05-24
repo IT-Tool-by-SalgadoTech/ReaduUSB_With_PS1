@@ -1,4 +1,0 @@
-REM Enumerate SMB shares, users and groups on a Windows/Samba host
-DELAY 500
-STRING read -p "Target IP: " ip; enum4linux -a "$ip" 2>/dev/null || echo "enum4linux not installed. Run: sudo apt install enum4linux"
-ENTER

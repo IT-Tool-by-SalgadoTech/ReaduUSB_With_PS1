@@ -1,4 +1,0 @@
-REM Mount a device to a folder
-DELAY 500
-STRING lsblk; read -p "Device to mount (e.g. sdb1): " d; read -p "Mount point (e.g. /mnt/usb): " mp; sudo mkdir -p "$mp" && sudo mount /dev/"$d" "$mp" && echo "Mounted /dev/$d at $mp"
-ENTER

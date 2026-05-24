@@ -1,3 +1,0 @@
-DELAY 1500
-STRING netstat -ano | findstr ":22"
-ENTER

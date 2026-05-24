@@ -1,4 +1,0 @@
-REM Web vulnerability scan using nikto
-DELAY 500
-STRING read -p "Target URL or IP: " t; nikto -h "$t" 2>/dev/null || echo "nikto not installed. Run: sudo apt install nikto"
-ENTER

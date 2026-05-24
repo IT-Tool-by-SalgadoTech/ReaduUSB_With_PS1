@@ -1,4 +1,0 @@
-REM Make a file executable
-DELAY 500
-STRING read -p "File path: " f; chmod +x "$f" && echo "$f is now executable."
-ENTER

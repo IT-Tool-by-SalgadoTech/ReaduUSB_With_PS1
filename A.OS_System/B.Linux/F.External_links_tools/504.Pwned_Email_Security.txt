@@ -1,4 +1,0 @@
-REM Open Have I Been Pwned - Email Security in default browser (Linux)
-DELAY 500
-STRING xdg-open https://haveibeenpwned.com/
-ENTER

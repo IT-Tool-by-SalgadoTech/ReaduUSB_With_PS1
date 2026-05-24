@@ -1,4 +1,0 @@
-REM Mostrar todas las reglas del firewall como administrador
-DELAY 1000
-STRING netsh advfirewall firewall show rule name=all
-ENTER

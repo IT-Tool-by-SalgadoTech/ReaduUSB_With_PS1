@@ -1,4 +1,0 @@
-REM Show top 20 largest directories from root
-DELAY 500
-STRING sudo du -xh / --max-depth=3 2>/dev/null | sort -rh | head -20
-ENTER

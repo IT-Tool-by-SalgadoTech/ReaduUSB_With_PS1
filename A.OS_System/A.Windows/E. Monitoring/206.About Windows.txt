@@ -1,6 +1,0 @@
-REM Launch winver
-DELAY 1000
-GUI r
-DELAY 1000
-STRING winver
-ENTER

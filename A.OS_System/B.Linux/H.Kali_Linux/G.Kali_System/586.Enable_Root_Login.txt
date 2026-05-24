@@ -1,4 +1,0 @@
-REM Enable root GUI login on Kali (GDM/LightDM)
-DELAY 500
-STRING sudo sed -i 's/^#\?AllowRoot.*/AllowRoot=true/' /etc/gdm3/daemon.conf 2>/dev/null; sudo sed -i 's/^#\?greeter-show-manual-login.*/greeter-show-manual-login=true/' /etc/lightdm/lightdm.conf 2>/dev/null; echo "Root login enabled. Restart display manager: sudo systemctl restart gdm3 or lightdm"
-ENTER

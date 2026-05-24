@@ -1,6 +1,0 @@
-REM Launch wf
-DELAY 1000
-GUI r
-DELAY 1000
-STRING wf.msc
-ENTER

@@ -1,4 +1,0 @@
-REM Check current user sudo privileges
-DELAY 500
-STRING sudo -l
-ENTER

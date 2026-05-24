@@ -1,4 +1,0 @@
-REM Show Bluetooth service status
-DELAY 500
-STRING sudo systemctl status bluetooth --no-pager && bluetoothctl show
-ENTER

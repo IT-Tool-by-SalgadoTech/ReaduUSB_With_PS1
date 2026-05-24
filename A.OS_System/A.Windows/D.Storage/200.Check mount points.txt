@@ -1,3 +1,0 @@
-DELAY 4000
-STRING fsutil volume list
-ENTER

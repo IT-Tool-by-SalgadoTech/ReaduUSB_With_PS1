@@ -1,4 +1,0 @@
-REM Open Gamepad / Controller Tester in default browser (Linux)
-DELAY 500
-STRING xdg-open https://hardwaretester.com/gamepad
-ENTER

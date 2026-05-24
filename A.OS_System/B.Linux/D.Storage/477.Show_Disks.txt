@@ -1,4 +1,0 @@
-REM Show all disks and partitions with sizes and filesystems
-DELAY 500
-STRING lsblk -o NAME,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINT,UUID
-ENTER

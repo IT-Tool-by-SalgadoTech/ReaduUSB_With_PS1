@@ -1,6 +1,0 @@
-REM Launch mstsc
-DELAY 1000
-GUI r
-DELAY 800
-STRING mstsc
-ENTER

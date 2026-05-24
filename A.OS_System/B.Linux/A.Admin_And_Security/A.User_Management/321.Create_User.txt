@@ -1,4 +1,0 @@
-REM Create a new standard user
-DELAY 500
-STRING read -p "New username: " u; sudo useradd -m -s /bin/bash "$u" && sudo passwd "$u" && echo "User $u created."
-ENTER
