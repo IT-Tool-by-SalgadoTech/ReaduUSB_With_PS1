@@ -6,7 +6,7 @@
 # Version: 1.1
 # Date: 2025-05-22
 # Category: Linux > Admin And Security > User Management
-# Description: Prompts for a username and launches an interactive password change for that local account using passwd.
+# Description: Prompts for a username and launches an interactive password change using passwd.
 # (c) 2025 SalgadoTech - All Rights Reserved
 # Unauthorized distribution prohibited
 # ==============================================================
@@ -25,8 +25,27 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 echo ""
-echo "  Change User Password"
-echo "  ---------------------"
+echo -e '\033[0;36m\033[0m'
+echo -e '\033[0;36m  _____ _____  _______ ____   ____  _\033[0m'
+echo -e '\033[0;36m |_   _|_   _||__   __/ __ \ / __ \| |\033[0m'
+echo -e '\033[0;36m   | |   | |     | | | |  | | |  | | |\033[0m'
+echo -e '\033[0;36m   | |   | |     | | | |  | | |  | | |\033[0m'
+echo -e '\033[0;36m  _| |_  | |     | | | |__| | |__| | |___\033[0m'
+echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
+echo -e '\033[0;36m\033[0m'
+echo -e '\033[0;37m  ==================================================================\033[0m'
+echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
+echo -e '\033[0;36m  Script: 318_Change_Password.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0318\033[0m'
+echo -e '\033[0;36m  Version: 1.1\033[0m'
+echo -e '\033[0;36m  Date: 2025-05-22\033[0m'
+echo -e '\033[0;36m  Category: Linux > Admin And Security > User Management\033[0m'
+echo -e '\033[0;36m  Description: Prompts for a username and launches an interactive password change using passwd\033[0m'
+echo -e '\033[0;36m  (c) 2025 SalgadoTech - All Rights Reserved\033[0m'
+echo -e '\033[0;36m  Unauthorized distribution prohibited\033[0m'
+echo -e '\033[0;37m  ==================================================================\033[0m'
+echo ""
+
 read -rp "  Username: " u
 
 if [ -z "$u" ]; then

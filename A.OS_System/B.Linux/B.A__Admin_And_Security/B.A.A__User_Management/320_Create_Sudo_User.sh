@@ -6,7 +6,7 @@
 # Version: 1.1
 # Date: 2025-05-22
 # Category: Linux > Admin And Security > User Management
-# Description: Creates a new local user with a home directory and bash shell, sets their password interactively, and adds them to the admin group (sudo on Debian/Ubuntu/Kali, wheel on Arch/Fedora).
+# Description: Creates a new user with home directory and bash shell, sets password, adds to admin group (sudo/wheel based on distro).
 # (c) 2025 SalgadoTech - All Rights Reserved
 # Unauthorized distribution prohibited
 # ==============================================================
@@ -24,7 +24,6 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Detect distro and set admin group
 if [ -f /etc/os-release ]; then
     . /etc/os-release
     DISTRO="$ID"
@@ -40,8 +39,27 @@ case "$DISTRO" in
 esac
 
 echo ""
-echo "  Create Sudo User"
-echo "  -----------------"
+echo -e '\033[0;36m\033[0m'
+echo -e '\033[0;36m  _____ _____  _______ ____   ____  _\033[0m'
+echo -e '\033[0;36m |_   _|_   _||__   __/ __ \ / __ \| |\033[0m'
+echo -e '\033[0;36m   | |   | |     | | | |  | | |  | | |\033[0m'
+echo -e '\033[0;36m   | |   | |     | | | |  | | |  | | |\033[0m'
+echo -e '\033[0;36m  _| |_  | |     | | | |__| | |__| | |___\033[0m'
+echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
+echo -e '\033[0;36m\033[0m'
+echo -e '\033[0;37m  ==================================================================\033[0m'
+echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
+echo -e '\033[0;36m  Script: 320_Create_Sudo_User.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0320\033[0m'
+echo -e '\033[0;36m  Version: 1.1\033[0m'
+echo -e '\033[0;36m  Date: 2025-05-22\033[0m'
+echo -e '\033[0;36m  Category: Linux > Admin And Security > User Management\033[0m'
+echo -e '\033[0;36m  Description: Creates a new user with home directory and bash shell, sets password, adds to admin group\033[0m'
+echo -e '\033[0;36m  (c) 2025 SalgadoTech - All Rights Reserved\033[0m'
+echo -e '\033[0;36m  Unauthorized distribution prohibited\033[0m'
+echo -e '\033[0;37m  ==================================================================\033[0m'
+echo ""
+
 echo -e "  Detected distro : ${YELLOW}$DISTRO${NC}"
 echo -e "  Admin group     : ${YELLOW}$ADMIN_GROUP${NC}"
 echo ""

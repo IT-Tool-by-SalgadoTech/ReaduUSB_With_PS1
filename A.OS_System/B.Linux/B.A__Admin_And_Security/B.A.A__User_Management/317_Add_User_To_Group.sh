@@ -25,8 +25,27 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 echo ""
-echo "  Add User To Group"
-echo "  ------------------"
+echo -e '\033[0;36m\033[0m'
+echo -e '\033[0;36m  _____ _____  _______ ____   ____  _\033[0m'
+echo -e '\033[0;36m |_   _|_   _||__   __/ __ \ / __ \| |\033[0m'
+echo -e '\033[0;36m   | |   | |     | | | |  | | |  | | |\033[0m'
+echo -e '\033[0;36m   | |   | |     | | | |  | | |  | | |\033[0m'
+echo -e '\033[0;36m  _| |_  | |     | | | |__| | |__| | |___\033[0m'
+echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
+echo -e '\033[0;36m\033[0m'
+echo -e '\033[0;37m  ==================================================================\033[0m'
+echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
+echo -e '\033[0;36m  Script: 317_Add_User_To_Group.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0317\033[0m'
+echo -e '\033[0;36m  Version: 1.1\033[0m'
+echo -e '\033[0;36m  Date: 2025-05-22\033[0m'
+echo -e '\033[0;36m  Category: Linux > Admin And Security > User Management\033[0m'
+echo -e '\033[0;36m  Description: Adds an existing user to a specified group using usermod -aG\033[0m'
+echo -e '\033[0;36m  (c) 2025 SalgadoTech - All Rights Reserved\033[0m'
+echo -e '\033[0;36m  Unauthorized distribution prohibited\033[0m'
+echo -e '\033[0;37m  ==================================================================\033[0m'
+echo ""
+
 read -rp "  Username: " u
 read -rp "  Group: " g
 
