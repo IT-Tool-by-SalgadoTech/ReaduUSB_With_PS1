@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # ============================================================================
 #  IT-Tool by SalgadoTech
-#  Script: 55.Check_ram.py
-#  ScriptID: ST-WIN-0055-PY
+#  Script: 57.Check_ram.py
+#  ScriptID: ST-WIN-0057-PY
 #  Version: 3.0
 #  Date: 2025-05-27
 #  Category: Windows / Linux > Hardware
@@ -118,7 +118,7 @@ HEADER = (
     f"\n"
     f"{WHITE}  {'=' * 64}{RESET}\n"
     f"{CYAN}  IT-Tool by SalgadoTech{RESET}\n"
-    f"{GRAY}  Script: 55.Check_ram.py  |  ScriptID: ST-WIN-0055-PY  |  v3.0{RESET}\n"
+    f"{GRAY}  Script: 57.Check_ram.py  |  ScriptID: ST-WIN-0057-PY  |  v3.0{RESET}\n"
     f"{GRAY}  Live RAM Monitor — Press Q or Ctrl+C to exit{RESET}\n"
     f"{WHITE}  {'=' * 64}{RESET}\n"
 )
