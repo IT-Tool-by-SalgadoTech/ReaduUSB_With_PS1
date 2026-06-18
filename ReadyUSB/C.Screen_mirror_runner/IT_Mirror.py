@@ -1,40 +1,44 @@
 #!/usr/bin/env python3
-"""
-IT-Tool PC Mirror — Touch Edition  v5
-Receives the IT-Tool screen (320x480 portrait, RGB565) via USB Serial
-and displays it scaled on your PC.
-
-Hardware:  Waveshare ESP32-S3-Touch-LCD-3.5 (ST7796, 320x480 portrait)
-Firmware:  ITTOOL_TOUCH_USB_Menus_v5_Mirror.txt
-Port:      COM7 (USB CDC — TinyUSB, VID:PID=303A:1001)
-
-Protocol (firmware → PC):
-  Header : 0xFF 0xAA W_hi W_lo H_hi H_lo   (6 bytes)
-  Pixels : W*H pixels, RGB565 big-endian    (W*H*2 bytes)
-  Footer : 0xFF 0xBB                        (2 bytes)
-
-Commands (PC → firmware):
-  CMD:A\n    right-click  → A (Select/Run)
-  CMD:B\n    left-click   → B (Back)
-  CMD:UP\n   scroll up    → UP
-  CMD:DOWN\n scroll down  → DOWN
-
-Requirements:
-    pip install pygame pyserial
-
-Usage:
-    python IT_Mirror_v2.py
-    python IT_Mirror_v2.py --port COM7
-    python IT_Mirror_v2.py --port COM7 --scale 2
-
-Cambios v2:
-  - scale default: 2 → 1 (320x480 nativo, mas manejable)
-  - Ventana movible: drag con click izquierdo en barra de titulo (24px superior)
-  - Modo diagnostico: al llegar el primer frame imprime en consola
-      cuantos pixels son cero vs. con datos, y los primeros 10 valores
-      → permite saber si el shadowFB del firmware esta vacio o lleno
-  - pygame.RESIZABLE eliminado de recreacion de ventana (interferia con drag)
-"""
+# -*- coding: utf-8 -*-
+# ============================================================================
+#  IT-Tool by SalgadoTech
+#  Script: IT_Mirror.py
+#  ScriptID: ST-WIN-XXXX-PY
+#  Version: 5.0
+#  Date: 2026-06-17
+#  Category: Windows / Linux > Companion Tools
+#  Description: IT-Tool PC Mirror - Touch Edition. Receives the IT-Tool
+#               screen (320x480 portrait, RGB565) over USB Serial and
+#               displays it scaled on the PC using pygame. Mouse actions
+#               map to A/B/UP/DOWN/LEFT/RIGHT commands sent to the firmware.
+#  (c) 2025 SalgadoTech - All Rights Reserved
+#  Unauthorized distribution prohibited
+#  Encoding: UTF-8 (no BOM)
+# ----------------------------------------------------------------------------
+#  Hardware : Waveshare ESP32-S3-Touch-LCD-3.5 (ST7796, 320x480 portrait)
+#  Firmware : ITTOOL_TOUCH_USB_Menus_v5_Mirror.txt
+#  Port     : USB CDC (TinyUSB, VID:PID=303A:1001) - e.g. COM7
+#
+#  Protocol (firmware -> PC):
+#    Header : 0xFF 0xAA W_hi W_lo H_hi H_lo      (6 bytes)
+#    Pixels : W*H pixels, RGB565 big-endian      (W*H*2 bytes)
+#    Footer : 0xFF 0xBB                          (2 bytes)
+#
+#  Commands (PC -> firmware):
+#    CMD:A      right-click  -> A (Select/Run)
+#    CMD:B      left-click   -> B (Back)
+#    CMD:UP     scroll up    -> UP
+#    CMD:DOWN   scroll down  -> DOWN
+#    CMD:LEFT   scroll       -> LEFT   (toggle axis: middle mouse button)
+#    CMD:RIGHT  scroll       -> RIGHT
+#
+#  Requirements : pip install pygame pyserial
+#
+#  Usage:
+#    python IT_Mirror.py
+#    python IT_Mirror.py --port COM7
+#    python IT_Mirror.py --port COM7 --scale 2
+# ============================================================================
 
 import sys
 import argparse
@@ -65,6 +69,28 @@ HEADER_SIZE = 6   # 0xFF 0xAA W_hi W_lo H_hi H_lo
 
 # Altura de la barra de titulo falsa (zona de drag)
 TITLE_BAR_H = 24
+
+# ── ANSI / Banner ─────────────────────────────────────────────────────────────
+CYAN  = "\033[96m"
+WHITE = "\033[97m"
+GRAY  = "\033[90m"
+RESET = "\033[0m"
+
+BANNER = (
+    f"\n"
+    f"{CYAN} _____ _____  _______ ____   ____  _     {RESET}\n"
+    f"{CYAN}|_   _|_   _||__   __/ __ \\ / __ \\| |    {RESET}\n"
+    f"{CYAN}  | |   | |     | | | |  | | |  | | |    {RESET}\n"
+    f"{CYAN}  | |   | |     | | | |  | | |  | | |    {RESET}\n"
+    f"{CYAN} _| |_  | |     | | | |__| | |__| | |___ {RESET}\n"
+    f"{CYAN}|_____| |_|     |_|  \\____/ \\____/|_____|{RESET}\n"
+    f"\n"
+    f"{WHITE}  {'=' * 64}{RESET}\n"
+    f"{CYAN}  IT-Tool by SalgadoTech{RESET}\n"
+    f"{GRAY}  Script: IT_Mirror.py  |  ScriptID: ST-WIN-XXXX-PY  |  v5.0{RESET}\n"
+    f"{GRAY}  PC Mirror - Touch Edition  |  Waveshare ESP32-S3-Touch-LCD-3.5{RESET}\n"
+    f"{WHITE}  {'=' * 64}{RESET}\n"
+)
 
 # ── Safe input ────────────────────────────────────────────────────────────────
 def safe_input(prompt=""):
@@ -274,16 +300,11 @@ def main():
                         help="Factor de escala (default 1 → 320x480 nativo)")
     args = parser.parse_args()
 
+    print(BANNER)
+
     # ── Selección de puerto ───────────────────────────────────────────────────
     port = args.port
     if port is None:
-        print("")
-        print("=" * 50)
-        print("   IT-Tool PC Mirror — Touch Edition  v4")
-        print("   Hardware: Waveshare ESP32-S3-Touch-LCD-3.5")
-        print("   Screen:   320x480 portrait")
-        print("=" * 50)
-        print("")
         print("Antes de continuar:")
         print("  1. Desconecta el cable USB del IT-Tool")
         print("  2. Vuelve a conectarlo")
