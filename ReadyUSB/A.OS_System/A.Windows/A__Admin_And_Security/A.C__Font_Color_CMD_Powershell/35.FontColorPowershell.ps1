@@ -10,8 +10,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 16.FontColorPowershell.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0016" -ForegroundColor Cyan
+Write-Host "  Script: 35.FontColorPowershell.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0035" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-23" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Console Customization" -ForegroundColor DarkCyan

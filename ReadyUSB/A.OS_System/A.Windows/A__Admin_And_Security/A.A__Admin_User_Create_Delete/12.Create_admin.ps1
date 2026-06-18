@@ -10,7 +10,7 @@ Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
 Write-Host "  Script: Create_admin.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0007" -ForegroundColor Cyan
+Write-Host "  ScriptID: ST-WIN-0012" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Admin & Security" -ForegroundColor DarkCyan

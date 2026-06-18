@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 137.C._EXTERNO_A_LOCAL_FIRST-TIME.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0137" -ForegroundColor Cyan
+Write-Host "  Script: 136.C._EXTERNO_A_LOCAL_FIRST-TIME.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0136" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > File Copy" -ForegroundColor DarkCyan

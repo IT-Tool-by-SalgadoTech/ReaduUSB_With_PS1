@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 23.D._Check_protection_status_on_all_units.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0023" -ForegroundColor Cyan
+Write-Host "  Script: 17.D._Check_protection_status_on_all_units.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0017" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > System Restore" -ForegroundColor DarkCyan

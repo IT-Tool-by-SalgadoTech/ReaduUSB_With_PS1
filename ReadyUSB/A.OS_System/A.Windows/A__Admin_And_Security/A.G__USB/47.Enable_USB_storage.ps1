@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 39.Enable_USB_storage.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0039" -ForegroundColor Cyan
+Write-Host "  Script: 47.Enable_USB_storage.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0047" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > USB" -ForegroundColor DarkCyan

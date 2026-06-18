@@ -10,8 +10,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 18.FontColorReset.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0018" -ForegroundColor Cyan
+Write-Host "  Script: 37.FontColorReset.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0037" -ForegroundColor Cyan
 Write-Host "  Version: 1.3" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-23" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Console Customization" -ForegroundColor DarkCyan

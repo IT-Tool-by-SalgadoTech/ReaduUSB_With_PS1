@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 25.F._CheckRestoreFreq.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0025" -ForegroundColor Cyan
+Write-Host "  Script: 19.F._CheckRestoreFreq.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0019" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > System Restore" -ForegroundColor DarkCyan

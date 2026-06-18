@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 158.A._Create_a_shared_folder.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0158" -ForegroundColor Cyan
+Write-Host "  Script: 157.A._Create_a_shared_folder.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0157" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Shared Folders" -ForegroundColor DarkCyan
