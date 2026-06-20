@@ -113,6 +113,8 @@ def safe_input(prompt=""):
 def list_serial_ports():
     ports = []
     for p in serial.tools.list_ports.comports():
+        if p.vid is None:          # USB only: skip Bluetooth/other virtual COM ports
+            continue
         ports.append((p.device, p.description or ""))
     return sorted(ports, key=lambda x: x[0])
 

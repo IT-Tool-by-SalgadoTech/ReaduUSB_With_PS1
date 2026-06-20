@@ -30,7 +30,7 @@ $comPort     = ""
 $portEntries = @()
 
 $portEntries = @(Get-PnpDevice -Class Ports -ErrorAction SilentlyContinue |
-    Where-Object { $_.Status -eq "OK" -and $_.FriendlyName -match "COM\d+" } |
+    Where-Object { $_.Status -eq "OK" -and $_.FriendlyName -match "COM\d+" -and $_.InstanceId -like "USB\*" } |
     ForEach-Object {
         $com  = [regex]::Match($_.FriendlyName, "COM\d+").Value
         $desc = $_.FriendlyName -replace "\s*\(COM\d+\)\s*$", ""
