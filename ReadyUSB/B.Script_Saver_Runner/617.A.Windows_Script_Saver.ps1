@@ -12,8 +12,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 616_A_Script_Saver.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0616" -ForegroundColor Cyan
+Write-Host "  Script: 617_A_Script_Saver.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0617" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-09" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > ReadyUSB" -ForegroundColor DarkCyan

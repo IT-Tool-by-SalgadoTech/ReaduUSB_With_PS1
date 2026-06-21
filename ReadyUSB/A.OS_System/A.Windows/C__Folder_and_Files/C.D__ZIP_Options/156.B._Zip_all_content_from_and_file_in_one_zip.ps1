@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 155.B._Zip_all_content_from_and_file_in_one_zip.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0155" -ForegroundColor Cyan
+Write-Host "  Script: 156.B._Zip_all_content_from_and_file_in_one_zip.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0156" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Compression" -ForegroundColor DarkCyan

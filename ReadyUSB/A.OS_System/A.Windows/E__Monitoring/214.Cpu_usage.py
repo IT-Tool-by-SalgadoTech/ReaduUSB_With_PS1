@@ -3,7 +3,7 @@
 # ============================================================================
 #  IT-Tool by SalgadoTech
 #  Script: ccpu.py
-#  ScriptID: ST-WIN-0213-PY
+#  ScriptID: ST-WIN-0214-PY
 #  Version: 1.0
 #  Date: 2025-05-27
 #  Category: Windows / Linux > Hardware
@@ -152,7 +152,7 @@ HEADER = (
     f"\n"
     f"{WHITE}  {'=' * 64}{RESET}\n"
     f"{CYAN}  IT-Tool by SalgadoTech{RESET}\n"
-    f"{GRAY}  Script: ccpu.py  |  ScriptID: ST-WIN-0213-PY  |  v1.2{RESET}\n"
+    f"{GRAY}  Script: ccpu.py  |  ScriptID: ST-WIN-0214-PY  |  v1.2{RESET}\n"
     f"{GRAY}  Live CPU Monitor — Press Q or Ctrl+C to exit{RESET}\n"
     f"{WHITE}  {'=' * 64}{RESET}\n"
 )

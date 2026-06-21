@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 205.FormatDisk.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0205" -ForegroundColor Cyan
+Write-Host "  Script: 206.FormatDisk.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0206" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Storage & Disks" -ForegroundColor DarkCyan

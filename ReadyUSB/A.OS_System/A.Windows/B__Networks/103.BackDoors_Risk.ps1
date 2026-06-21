@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 102.BackDoors_Risk.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0102" -ForegroundColor Cyan
+Write-Host "  Script: 103.BackDoors_Risk.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0103" -ForegroundColor Cyan
 Write-Host "  Version: 1.2" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Security" -ForegroundColor DarkCyan

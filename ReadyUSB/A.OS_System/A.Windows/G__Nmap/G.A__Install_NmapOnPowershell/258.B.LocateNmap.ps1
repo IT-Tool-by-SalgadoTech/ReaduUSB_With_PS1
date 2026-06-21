@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 257_B_LocateNmap.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0257" -ForegroundColor Cyan
+Write-Host "  Script: 258_B_LocateNmap.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0258" -ForegroundColor Cyan
 Write-Host "  Version: 1.2" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Nmap" -ForegroundColor DarkCyan

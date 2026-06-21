@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 144.B._Remove_attributes_from_a_file.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0144" -ForegroundColor Cyan
+Write-Host "  Script: 145.B._Remove_attributes_from_a_file.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0145" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Files & Folders" -ForegroundColor DarkCyan

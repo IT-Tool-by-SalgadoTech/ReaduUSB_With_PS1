@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 95.A.Enable_SSH_Server.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0095" -ForegroundColor Cyan
+Write-Host "  Script: 96.A.Enable_SSH_Server.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0096" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > SSH" -ForegroundColor DarkCyan
