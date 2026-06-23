@@ -21,6 +21,10 @@ install_if_missing([
     ("psutil",   "psutil"),
     ("openpyxl", "openpyxl"),
     ("colorama", "colorama"),
+    ("rich",     "rich"),
+    ("textual",  "textual"),
+    ("pyserial", "serial"),
+    ("pyusb",    "usb"),
 ])
 
 import psutil, openpyxl
@@ -28,6 +32,17 @@ from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from colorama import init, Fore, Style
 init(autoreset=True)
+from rich.console import Console
+from rich.table import Table
+from rich.layout import Layout
+from rich.panel import Panel
+from rich.text import Text
+from rich.live import Live
+from rich import box
+from textual.app import App, ComposeResult
+from textual.containers import VerticalScroll
+from textual.widgets import Static
+from textual.binding import Binding
 
 # ─── Colors ───────────────────────────────────────────────────────────────────
 RED    = Fore.RED    + Style.BRIGHT
@@ -66,7 +81,7 @@ thin_border = Border(
 )
 
 # ─── Globals ──────────────────────────────────────────────────────────────────
-VERSION        = "2.0.0"
+VERSION        = "3.0.0"
 g_os_target    = ""
 g_duration     = 0        # seconds; 0 = indefinite
 g_stop_event   = threading.Event()
@@ -695,9 +710,11 @@ def check_logged_users(cycle):
         suspicious = u.host not in ('','::1','localhost','127.0.0.1',':0') and bool(u.host)
         sev        = "WARNING" if suspicious else "OK"
         if suspicious: critical_findings.append(f"REMOTE LOGIN: {u.name} from {u.host}")
+        src = u.host if (u.host and u.host not in ('','::1','localhost','127.0.0.1',':0')) else "local"
         rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Logged Users",
-                        "Check":u.name,"Finding":u.terminal or "N/A",
-                        "Details":f"Host:{u.host or 'local'} | Login:{login_t}",
+                        "Check":u.name,
+                        "Finding":src,
+                        "Details":f"Login:{login_t}",
                         "Status":"REMOTE" if suspicious else "LOCAL",
                         "Delta":"","Severity":sev,
                         "Recommendation":f"Verify remote session from {u.host}" if suspicious else ""})
@@ -860,40 +877,200 @@ def check_firewall(cycle):
 
 def check_usb_devices(cycle):
     global g_baseline_usb
-    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []; current = set()
-    if g_os_target == "windows":
-        out = run_cmd("wmic logicaldisk get caption,description,drivetype 2>nul")
-    else:
-        out = run_cmd("lsusb 2>/dev/null")
-    for line in out.splitlines()[1:]:
-        if line.strip():
-            line_clean = line.strip()
-            if os.name != 'nt':
-                low = line_clean.lower()
-                if "root hub" in low or "host controller" in low:
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if not hasattr(check_usb_devices, "_known"):
+        check_usb_devices._known        = {}  # key -> device dict (persists name across cycles)
+    if not hasattr(check_usb_devices, "_gone_persist"):
+        check_usb_devices._gone_persist = {}  # key -> cycles remaining to display
+
+    # ── Lookup tables (ported from usb_monitor) ───────────────────────────────
+    USB_CLASS = {
+        0x00:"Device", 0x01:"Audio", 0x02:"Communications (CDC)",
+        0x03:"HID (Human Interface)", 0x05:"Physical", 0x06:"Image",
+        0x07:"Printer", 0x08:"Mass Storage", 0x09:"USB Hub",
+        0x0A:"CDC-Data", 0x0B:"Smart Card", 0x0D:"Content Security",
+        0x0E:"Video", 0x0F:"Personal Healthcare", 0x10:"Audio/Video",
+        0xDC:"Diagnostic", 0xE0:"Wireless Controller", 0xEF:"Miscellaneous",
+        0xFE:"Application Specific", 0xFF:"Vendor Specific",
+    }
+    USB_SPEED = {
+        0x0100:"USB 1.0 (1.5 Mbps)", 0x0110:"USB 1.1 (12 Mbps)",
+        0x0200:"USB 2.0 (480 Mbps)", 0x0201:"USB 2.0 (480 Mbps)",
+        0x0300:"USB 3.0 (5 Gbps)",   0x0310:"USB 3.1 (10 Gbps)",
+        0x0320:"USB 3.2 (20 Gbps)",
+    }
+
+    def _dev_key(d):
+        return f"{d['vid']}:{d['pid']}:{d['com_port']}:{d['mac']}:{d['sn']}"
+
+    # pyusb metadata enrichment (same as usb_monitor get_usb_device_info_pyusb)
+    def _usb_extra(vid, pid):
+        info = {}
+        try:
+            import usb.core as _usbc
+            import usb.util as _usbu
+        except Exception:
+            return info
+        try:
+            dev = _usbc.find(idVendor=vid, idProduct=pid)
+            if dev is None:
+                return info
+            try:    info["manufacturer"]  = _usbu.get_string(dev, dev.iManufacturer)  if dev.iManufacturer  else "N/A"
+            except Exception: info["manufacturer"]  = "N/A"
+            try:    info["product_name"]  = _usbu.get_string(dev, dev.iProduct)       if dev.iProduct       else "N/A"
+            except Exception: info["product_name"]  = "N/A"
+            try:    info["serial_number"] = _usbu.get_string(dev, dev.iSerialNumber)  if dev.iSerialNumber  else "N/A"
+            except Exception: info["serial_number"] = "N/A"
+            bcd = getattr(dev, "bcdUSB", None)
+            info["usb_version"] = USB_SPEED.get(bcd, f"USB bcdUSB=0x{bcd:04X}" if bcd else "Unknown")
+            cls = getattr(dev, "bDeviceClass", 0xFF)
+            info["device_class"] = USB_CLASS.get(cls, f"Class 0x{cls:02X}")
+        except Exception:
+            pass
+        return info
+
+    current   = {}     # key -> device dict
+    serial_vp = set()  # {(int_vid, int_pid)} captured as serial, skipped in pass 3
+
+    # ── 1. COM / Serial port devices (pyserial) — usb_monitor pass 1 ──────────
+    try:
+        import serial.tools.list_ports as _lp
+        for port in _lp.comports():
+            vid = port.vid or 0
+            pid = port.pid or 0
+            extra = _usb_extra(vid, pid)
+            d = {
+                "dev_type": "Serial/COM",
+                "name":     port.description or extra.get("product_name", "Unknown"),
+                "com_port": port.device,
+                "vid":      f"0x{vid:04X}" if vid else "N/A",
+                "pid":      f"0x{pid:04X}" if pid else "N/A",
+                "mfr":      extra.get("manufacturer") or port.manufacturer or "N/A",
+                "sn":       extra.get("serial_number") or port.serial_number or "N/A",
+                "mac":      "N/A",
+                "hwid":     port.hwid or "N/A",
+                "usb_ver":  extra.get("usb_version", "Unknown"),
+            }
+            current[_dev_key(d)] = d
+            serial_vp.add((vid, pid))
+    except Exception:
+        pass
+
+    # ── 2. USB network adapters — MAC heuristic — usb_monitor pass 2 ──────────
+    try:
+        USB_NET_KW = ("usb", "rndis", "gadget", "android", "tethering", "mobile")
+        for iface, addrs in psutil.net_if_addrs().items():
+            if not any(kw in iface.lower() for kw in USB_NET_KW):
+                continue
+            for addr in addrs:
+                if addr.family == psutil.AF_LINK and addr.address not in ("", "00:00:00:00:00:00"):
+                    d = {
+                        "dev_type": "USB Network",
+                        "name":     iface,
+                        "com_port": "N/A",
+                        "vid":      "N/A",
+                        "pid":      "N/A",
+                        "mfr":      "N/A",
+                        "sn":       "N/A",
+                        "mac":      addr.address.upper(),
+                        "hwid":     "N/A",
+                        "usb_ver":  "Unknown",
+                    }
+                    current[_dev_key(d)] = d
+    except Exception:
+        pass
+
+    # ── 3. All other USB devices (pyusb find_all) — usb_monitor pass 3 ────────
+    try:
+        import usb.core as _usbc
+        all_devs = _usbc.find(find_all=True)
+        if all_devs:
+            for dev in all_devs:
+                vid = dev.idVendor
+                pid = dev.idProduct
+                if (vid, pid) in serial_vp:
                     continue
-            current.add(line_clean)
-    is_baseline = len(g_baseline_usb) == 0
-    new_usb     = current - g_baseline_usb
-    gone_usb    = g_baseline_usb - current
-    for dev in current:
-        is_new = dev in new_usb and not is_baseline
-        sev    = "WARNING" if is_new else "OK"
-        if is_new: critical_findings.append(f"NEW USB: {dev[:50]}")
+                extra = _usb_extra(vid, pid)
+                cls = getattr(dev, "bDeviceClass", 0xFF)
+                bcd = getattr(dev, "bcdUSB", None)
+                d = {
+                    "dev_type": USB_CLASS.get(cls, "USB Device"),
+                    "name":     extra.get("product_name", f"USB Device {vid:04X}:{pid:04X}"),
+                    "com_port": "N/A",
+                    "vid":      f"0x{vid:04X}",
+                    "pid":      f"0x{pid:04X}",
+                    "mfr":      extra.get("manufacturer", "N/A"),
+                    "sn":       extra.get("serial_number", "N/A"),
+                    "mac":      "N/A",
+                    "hwid":     f"{vid:04X}:{pid:04X}",
+                    "usb_ver":  USB_SPEED.get(bcd, f"bcdUSB 0x{bcd:04X}" if bcd else "Unknown"),
+                }
+                current[_dev_key(d)] = d
+    except Exception:
+        pass
+
+    # Update persistent name/info cache
+    for k, d in current.items():
+        check_usb_devices._known[k] = d
+
+    # ── Baseline & change detection ───────────────────────────────────────────
+    current_keys  = set(current.keys())
+    is_baseline   = len(g_baseline_usb) == 0
+    new_keys      = current_keys - g_baseline_usb
+    gone_keys     = g_baseline_usb - current_keys
+
+    if not is_baseline:
+        for k in gone_keys:
+            check_usb_devices._gone_persist[k] = 10   # persist 10 cycles (~20 s)
+    for k in new_keys:
+        check_usb_devices._gone_persist.pop(k, None)  # reconnected — clear
+    for k in list(check_usb_devices._gone_persist.keys()):
+        check_usb_devices._gone_persist[k] -= 1
+        if check_usb_devices._gone_persist[k] <= 0:
+            del check_usb_devices._gone_persist[k]
+
+    g_baseline_usb = current_keys
+
+    # ── Display: connected devices ────────────────────────────────────────────
+    for k, d in current.items():
+        is_new  = k in new_keys and not is_baseline
+        is_hid  = "hid" in d["dev_type"].lower()
+        is_ser  = d["com_port"] != "N/A"
+        sev     = "WARNING" if is_new else "OK"
+        dp = []
+        if is_ser:            dp.append(f"Port: {d['com_port']}")
+        if d["mac"] != "N/A": dp.append(f"MAC: {d['mac']}")
+        if d["vid"] != "N/A": dp.append(f"VID:{d['vid']} PID:{d['pid']}")
+        if d["mfr"] != "N/A": dp.append(f"Mfr: {d['mfr']}")
+        if d["sn"]  != "N/A": dp.append(f"SN: {d['sn']}")
+        if is_new:
+            critical_findings.append(f"NEW HID: {d['name'][:45]}" if is_hid else f"NEW USB: {d['name'][:45]}")
         rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"USB Devices",
-                        "Check":"Device","Finding":dev[:80],"Details":"",
-                        "Status":"CONNECTED","Delta":"NEW ▲" if is_new else ("BASELINE" if is_baseline else ""),
-                        "Severity":sev,"Recommendation":"Verify new USB device" if is_new else ""})
-    for dev in gone_usb:
+                        "Check":d["dev_type"],"Finding":d["name"][:70],
+                        "Details":" | ".join(dp),
+                        "Status":"CONNECTED",
+                        "Delta":"NEW ▲" if is_new else ("BASELINE" if is_baseline else ""),
+                        "Severity":sev,
+                        "Recommendation":"Verify new USB — HID may be BadUSB" if is_new and is_hid else ("Verify new USB device" if is_new else "")})
+
+    # ── Display: disconnected devices (persist 10 cycles / ~20 s) ─────────────
+    for k in check_usb_devices._gone_persist:
+        d_gone    = check_usb_devices._known.get(k, {})
+        gone_name = d_gone.get("name", k[:60])
+        gone_type = d_gone.get("dev_type", "Device")
+        gone_port = d_gone.get("com_port", "N/A")
+        detail    = f"Port: {gone_port}" if gone_port != "N/A" else "Removed this session"
         rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"USB Devices",
-                        "Check":"Device","Finding":dev[:80],"Details":"Disconnected",
-                        "Status":"DISCONNECTED","Delta":"GONE ▼","Severity":"INFO",
-                        "Recommendation":"USB device removed"})
-    if not current and not gone_usb:
+                        "Check":gone_type,"Finding":gone_name[:70],
+                        "Details":detail,
+                        "Status":"DISCONNECTED","Delta":"GONE ▼","Severity":"WARNING",
+                        "Recommendation":"USB device disconnected"})
+
+    if not current and not check_usb_devices._gone_persist:
         rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"USB Devices",
                         "Check":"No devices","Finding":"None","Details":"",
                         "Status":"OK","Delta":"","Severity":"INFO","Recommendation":""})
-    g_baseline_usb = current
+
     status = "WARNING" if critical_findings else "OK"
     rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"USB Devices","Status":status,
                    "Critical Findings":"; ".join(critical_findings) if critical_findings else f"{len(current)} device(s) — no changes",
@@ -1248,20 +1425,31 @@ def check_rdp_sessions(cycle):
     ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
     if g_os_target == "windows":
         out = run_cmd("query session 2>nul")
-        for line in out.splitlines()[1:]:
+        lines = out.splitlines()
+        hdr = lines[0].upper() if lines else ""
+        col_u  = hdr.find("USERNAME") if "USERNAME" in hdr else 19
+        col_id = hdr.find(" ID")      if " ID"      in hdr else 38
+        col_st = hdr.find("STATE")    if "STATE"    in hdr else 46
+        col_u  = max(col_u, 0); col_id = max(col_id, 0); col_st = max(col_st, 0)
+        for line in lines[1:]:
             if not line.strip(): continue
-            parts = line.split()
-            if len(parts) >= 3:
-                session_name = parts[0].strip(">")
-                username     = parts[1] if len(parts) > 1 else "N/A"
-                state        = parts[3] if len(parts) > 3 else "N/A"
-                is_rdp = "rdp" in session_name.lower() or "tcp" in session_name.lower()
-                sev = "WARNING" if is_rdp else "OK"
-                if is_rdp: critical_findings.append(f"RDP SESSION: {username} on {session_name}")
-                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"RDP Sessions",
-                                "Check":session_name,"Finding":username,
-                                "Details":f"State:{state}","Status":state,"Delta":"","Severity":sev,
-                                "Recommendation":"Verify RDP session is authorized" if is_rdp else ""})
+            session_name = line[:col_u].strip().lstrip(">").strip()
+            username     = line[col_u:col_id].strip()
+            state_raw    = line[col_st:col_st+12].strip() if col_st < len(line) else ""
+            state        = state_raw.split()[0] if state_raw else "Unknown"
+            # Skip listener rows (no real user) and numeric-only "usernames" (session IDs)
+            if not username or username.isdigit():
+                continue
+            is_rdp    = "rdp" in session_name.lower() or "tcp" in session_name.lower()
+            is_active = state.lower() == "active"
+            sev = "WARNING" if (is_rdp and is_active) else "OK"
+            if is_rdp and is_active:
+                critical_findings.append(f"RDP SESSION: {username} on {session_name} [{state}]")
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"RDP Sessions",
+                            "Check":session_name or "console","Finding":username,
+                            "Details":f"State:{state}","Status":state or "Unknown",
+                            "Delta":"","Severity":sev,
+                            "Recommendation":"Verify RDP session is authorized" if is_rdp and is_active else ""})
         rdp_events = run_cmd(
             'wevtutil qe Security /q:"*[System[EventID=4624] and EventData[Data[@Name=\'LogonType\']'
             'and(Data=\'10\')]]" /c:5 /rd:true /f:text 2>nul | findstr /i "Account Name"', timeout=10)
@@ -1459,8 +1647,8 @@ def check_privileged_processes(cycle):
                     unexpected.append(pname)
                     critical_findings.append(f"UNEXPECTED SYSTEM: {pname}")
                     rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Privileged Processes",
-                                    "Check":pname,"Finding":user[:40],
-                                    "Details":"Not in known SYSTEM process list",
+                                    "Check":pname,"Finding":f"{pname} (PID {parts[1]})",
+                                    "Details":f"Account: {user[:40]} | Not in known SYSTEM list",
                                     "Status":"UNEXPECTED","Delta":"","Severity":"WARNING",
                                     "Recommendation":f"Investigate {pname} running as SYSTEM"})
         rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Privileged Processes",
@@ -1501,26 +1689,57 @@ def check_privileged_processes(cycle):
 
 def check_recent_software(cycle):
     ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if not hasattr(check_recent_software, '_sw_baseline'):
+        check_recent_software._sw_baseline = None
     if g_os_target == "windows":
+        found = {}  # display_name -> (date_fmt, days_ago)
         for reg_path in [
             r"HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall",
             r"HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall",
         ]:
             out = run_cmd(f'reg query "{reg_path}" /s /v InstallDate 2>nul', timeout=20)
+            current_key = ""
             for line in out.splitlines():
+                line = line.strip()
+                if line.startswith("HKEY"):
+                    current_key = line
+                    continue
                 if "InstallDate" not in line: continue
-                parts = line.split(); date_str = parts[-1] if parts else ""
-                if len(date_str) == 8 and date_str.isdigit():
-                    try:
-                        days_ago = (datetime.datetime.now() - datetime.datetime.strptime(date_str,"%Y%m%d")).days
-                        if days_ago <= 7:
-                            critical_findings.append(f"RECENT INSTALL ({days_ago}d ago): {date_str}")
-                            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Recent Software",
-                                            "Check":"Recent Install","Finding":date_str,
-                                            "Details":f"Installed {days_ago} day(s) ago",
-                                            "Status":"RECENT","Delta":"","Severity":"WARNING",
-                                            "Recommendation":"Verify this installation is authorized"})
-                    except: pass
+                parts = line.split()
+                date_str = parts[-1] if parts else ""
+                if len(date_str) != 8 or not date_str.isdigit(): continue
+                try:
+                    days_ago = (datetime.datetime.now() - datetime.datetime.strptime(date_str, "%Y%m%d")).days
+                except Exception:
+                    continue
+                if days_ago > 7 or not current_key: continue
+                name_out = run_cmd(f'reg query "{current_key}" /v DisplayName 2>nul', timeout=5)
+                name = ""
+                for nl in name_out.splitlines():
+                    if "DisplayName" in nl and "REG_SZ" in nl:
+                        idx = nl.find("REG_SZ")
+                        if idx >= 0:
+                            name = nl[idx + 6:].strip()
+                if not name: continue
+                if name not in found:
+                    date_fmt = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
+                    found[name] = (date_fmt, days_ago)
+        if check_recent_software._sw_baseline is None:
+            check_recent_software._sw_baseline = set(found.keys())
+        for name, (date_fmt, days_ago) in sorted(found.items(), key=lambda x: x[1][1]):
+            is_new = name not in check_recent_software._sw_baseline
+            sev    = "WARNING" if is_new else "INFO"
+            label  = f"{name[:55]} ({date_fmt}, {days_ago}d ago)"
+            if is_new:
+                critical_findings.append(f"NEW SOFTWARE: {name[:50]}")
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Recent Software",
+                            "Check":"Recent Install","Finding":label[:80],
+                            "Details":f"Installed {days_ago} day(s) ago",
+                            "Status":"NEW" if is_new else "RECENT",
+                            "Delta":"NEW ▲" if is_new else "",
+                            "Severity":sev,
+                            "Recommendation":"Verify this installation" if is_new else ""})
+        check_recent_software._sw_baseline = set(found.keys())
         if not rows_t:
             rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Recent Software",
                             "Check":"Recent Installs","Finding":"None in last 7 days",
@@ -1982,247 +2201,1161 @@ def save_traffic_to_excel(traffic_rows):
             pass
 
 
-def show_live_traffic_and_countdown(wait_seconds, cycle_num, duration_end=None):
-    """
-    During the 15-min wait between cycles:
-      1. Live connections via psutil — refreshes every 2s
-      2. LAN Devices panel — ARP scan detects new devices
-      3. tshark background capture — saves to Excel at end
+# ─── PHASE 2: POSTURE + ANTI-FORENSIC CHECKS ─────────────────────────────────
 
-    On Linux the display loop runs in a daemon thread so time.sleep()
-    inside it cannot block the main thread. The main thread waits on a
-    threading.Event — this eliminates the inter-cycle freeze on Kali.
-    Windows: same behaviour, also runs in thread for consistency.
+def check_defender_status(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if g_os_target == "windows":
+        out = run_cmd(
+            'powershell -NoProfile -Command "Get-MpComputerStatus | Select-Object '
+            'AntivirusEnabled,RealTimeProtectionEnabled,TamperProtectionSource,'
+            'AntivirusSignatureAge | ConvertTo-Csv -NoTypeInformation" 2>nul', timeout=15)
+        csv_lines = [l.strip() for l in out.splitlines() if l.strip()]
+        if len(csv_lines) >= 2:
+            hdrs = [h.strip('"') for h in csv_lines[0].split(',')]
+            vals = [v.strip('"') for v in csv_lines[1].split(',')]
+            data = dict(zip(hdrs, vals))
+            av_on  = data.get("AntivirusEnabled","").upper() == "TRUE"
+            rtp_on = data.get("RealTimeProtectionEnabled","").upper() == "TRUE"
+            tamper = data.get("TamperProtectionSource","")
+            try: sig_age = int(data.get("AntivirusSignatureAge","0"))
+            except: sig_age = 0
+            for check, val, is_crit, is_warn, rec in [
+                ("Antivirus Enabled",   str(av_on),  not av_on,       False,        "Enable Windows Defender AV"),
+                ("Real-Time Protection",str(rtp_on), not rtp_on,      False,        "Enable real-time protection"),
+                ("Signature Age (days)",str(sig_age), False,           sig_age > 3,  "Update Defender signatures"),
+                ("Tamper Protection",   tamper,       False,           tamper == "", "Enable Tamper Protection"),
+            ]:
+                sev = "CRITICAL" if is_crit else ("WARNING" if is_warn else "OK")
+                if is_crit: critical_findings.append(f"DEFENDER: {check} = {val}")
+                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Defender / AV",
+                                "Check":check,"Finding":val,"Details":"",
+                                "Status":sev,"Delta":"","Severity":sev,
+                                "Recommendation":rec if (is_crit or is_warn) else ""})
+        else:
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Defender / AV",
+                            "Check":"Defender","Finding":"Unable to query","Details":out[:80],
+                            "Status":"WARNING","Delta":"","Severity":"WARNING",
+                            "Recommendation":"Run as administrator or check Defender service"})
+    else:
+        for tool, cmd_str in [("ClamAV","clamscan --version 2>/dev/null"),
+                               ("ufw","ufw status 2>/dev/null | head -1")]:
+            out = run_cmd(cmd_str, timeout=5)
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Defender / AV",
+                            "Check":tool,"Finding":out[:60] if out else "Not found","Details":"",
+                            "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    status = "CRITICAL" if any(r.get("Severity") == "CRITICAL" for r in rows_t) else \
+             "WARNING" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Defender / AV","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "Defender active",
+                   "Recommendation":"Fix Defender issues" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_windows_update(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if g_os_target == "windows":
+        out = run_cmd(
+            'powershell -NoProfile -Command "Get-HotFix | Sort-Object InstalledOn -Descending | '
+            'Select-Object -First 1 | Select-Object HotFixID,InstalledOn | '
+            'ConvertTo-Csv -NoTypeInformation" 2>nul', timeout=15)
+        csv_lines = [l.strip() for l in out.splitlines() if l.strip()]
+        if len(csv_lines) >= 2:
+            hdrs = [h.strip('"') for h in csv_lines[0].split(',')]
+            vals = [v.strip('"') for v in csv_lines[1].split(',')]
+            data = dict(zip(hdrs, vals))
+            hfid = data.get("HotFixID","N/A")
+            inst = data.get("InstalledOn","N/A")
+            try:
+                inst_dt  = datetime.datetime.strptime(inst.split(" ")[0], "%m/%d/%Y")
+                days_ago = (datetime.datetime.now() - inst_dt).days
+            except Exception:
+                days_ago = -1
+            is_stale = days_ago > 30
+            sev = "WARNING" if is_stale else "OK"
+            if is_stale: critical_findings.append(f"STALE: Last patch {days_ago}d ago ({hfid})")
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Windows Update",
+                            "Check":"Last Patch","Finding":f"{hfid} ({inst})",
+                            "Details":f"{days_ago}d since last update" if days_ago >= 0 else "",
+                            "Status":sev,"Delta":"","Severity":sev,
+                            "Recommendation":"Run Windows Update" if is_stale else ""})
+        else:
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Windows Update",
+                            "Check":"Last Patch","Finding":"Unable to query","Details":"",
+                            "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    else:
+        out = run_cmd("apt list --upgradable 2>/dev/null | wc -l", timeout=10)
+        try: count = max(0, int(out.strip()) - 1)
+        except: count = 0
+        sev = "WARNING" if count > 10 else "OK"
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Windows Update",
+                        "Check":"Pending Updates","Finding":f"{count} packages upgradable",
+                        "Details":"","Status":sev,"Delta":"","Severity":sev,
+                        "Recommendation":"Run apt upgrade" if sev == "WARNING" else ""})
+    status = "WARNING" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Windows Update","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "System up to date",
+                   "Recommendation":"Update system" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_bitlocker_secureboot(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if g_os_target == "windows":
+        bl_out = run_cmd(
+            'powershell -NoProfile -Command "Get-BitLockerVolume | '
+            'Select-Object MountPoint,VolumeStatus,ProtectionStatus | '
+            'ConvertTo-Csv -NoTypeInformation" 2>nul', timeout=15)
+        for line in bl_out.splitlines()[1:]:
+            parts = [p.strip('"') for p in line.split(',')]
+            if len(parts) < 3: continue
+            mount, vol_status, prot = parts[0], parts[1], parts[2]
+            protected = "FullyEncrypted" in vol_status or prot == "On"
+            sev = "OK" if protected else "WARNING"
+            if not protected and mount.upper() == "C:":
+                critical_findings.append(f"C: drive NOT encrypted")
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"BitLocker / SecureBoot",
+                            "Check":f"BitLocker {mount}","Finding":vol_status,
+                            "Details":f"Protection: {prot}","Status":prot,
+                            "Delta":"","Severity":sev,
+                            "Recommendation":"Enable BitLocker on system drive" if not protected and mount.upper() == "C:" else ""})
+        if not bl_out.strip():
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"BitLocker / SecureBoot",
+                            "Check":"BitLocker","Finding":"Not available or access denied","Details":"",
+                            "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+        sb_out = run_cmd('powershell -NoProfile -Command "Confirm-SecureBootUEFI" 2>nul', timeout=10)
+        sb_val = sb_out.strip()
+        sb_on  = sb_val.upper() == "TRUE"
+        sb_sev = "OK" if sb_on else ("WARNING" if sb_val else "INFO")
+        if not sb_on and sb_val:
+            critical_findings.append("Secure Boot disabled")
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"BitLocker / SecureBoot",
+                        "Check":"Secure Boot","Finding":sb_val if sb_val else "N/A",
+                        "Details":"","Status":"ON" if sb_on else ("OFF" if sb_val else "N/A"),
+                        "Delta":"","Severity":sb_sev,
+                        "Recommendation":"Enable Secure Boot in BIOS" if not sb_on and sb_val else ""})
+    else:
+        sb = run_cmd("mokutil --sb-state 2>/dev/null", timeout=5)
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"BitLocker / SecureBoot",
+                        "Check":"Secure Boot","Finding":sb[:60] if sb else "N/A","Details":"",
+                        "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+        enc = run_cmd("lsblk -o FSTYPE | grep -c crypt", timeout=5)
+        try: enc_cnt = int(enc.strip())
+        except: enc_cnt = 0
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"BitLocker / SecureBoot",
+                        "Check":"Disk Encryption","Finding":"Encrypted" if enc_cnt else "None detected",
+                        "Details":"","Status":"OK" if enc_cnt else "INFO",
+                        "Delta":"","Severity":"OK" if enc_cnt else "INFO","Recommendation":""})
+    status = "WARNING" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"BitLocker / SecureBoot","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "Encryption/SecureBoot OK",
+                   "Recommendation":"Enable encryption/SecureBoot" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_audit_policy(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if g_os_target == "windows":
+        # Only the 11 subcategories that matter for security monitoring.
+        # Key: subcategory name (lowercase, as auditpol prints it).
+        # Value: (display label with category, what it detects).
+        CRITICAL_SUBS = {
+            "credential validation":     (
+                "Account Logon > Credential Validation",
+                "Password/hash checks at domain level — detects brute force and pass-the-hash attacks"),
+            "logon":                     (
+                "Logon/Logoff > Logon",
+                "Every user sign-in to the system — required to detect unauthorized access"),
+            "logoff":                    (
+                "Logon/Logoff > Logoff",
+                "User sign-outs — needed to detect orphaned sessions and calculate session time"),
+            "account lockout":           (
+                "Logon/Logoff > Account Lockout",
+                "Account locked after failed logins — primary brute force indicator"),
+            "special logon":             (
+                "Logon/Logoff > Special Logon",
+                "Admin/elevated logons — detects privilege escalation at sign-in time"),
+            "process creation":          (
+                "Detailed Tracking > Process Creation",
+                "Every new process launch (cmd.exe, powershell.exe...) — #1 malware detection source"),
+            "audit policy change":       (
+                "Policy Change > Audit Policy Change",
+                "Audit settings modified — attackers disable logging before attacking"),
+            "user account management":   (
+                "Account Management > User Account Management",
+                "User created/deleted/modified — detects persistence via new accounts"),
+            "security group management": (
+                "Account Management > Security Group Management",
+                "Group membership changes — detects unauthorized admin privilege grants"),
+            "sensitive privilege use":   (
+                "Privilege Use > Sensitive Privilege Use",
+                "Use of SeDebug/SeTcb/SeBackup — common in Mimikatz and credential theft tools"),
+            "security state change":     (
+                "System > Security State Change",
+                "Security subsystem startup/shutdown — detects Defender or audit engine being killed"),
+        }
+        KNOWN_SETTINGS = ("success and failure", "success", "failure", "no auditing")
+        out = run_cmd('auditpol /get /category:* 2>nul', timeout=15)
+        current_category = ""
+        matched = {}  # subcategory_lower -> setting string
+        for line in out.splitlines():
+            stripped = line.strip()
+            if not stripped: continue
+            # Category header: no leading spaces, no setting keyword at end
+            low = stripped.lower()
+            if not line.startswith(" ") and not any(s in low for s in KNOWN_SETTINGS):
+                current_category = stripped
+                continue
+            # Subcategory line: has a setting at the end
+            setting = ""
+            for s in KNOWN_SETTINGS:
+                if low.endswith(s):
+                    setting = stripped[-len(s):]
+                    sub_name = stripped[:-len(s)].strip().lower()
+                    if sub_name in CRITICAL_SUBS:
+                        matched[sub_name] = setting
+                    break
+        # Emit one row per critical subcategory (always, even if not found)
+        for sub_key, (label, description) in CRITICAL_SUBS.items():
+            setting = matched.get(sub_key, "Not Found")
+            is_off  = setting.lower() in ("no auditing", "not found")
+            sev     = "CRITICAL" if is_off else "OK"
+            if is_off:
+                critical_findings.append(f"AUDIT OFF: {label.split(' > ')[-1]}")
+            short_name = label.split(" > ")[-1]
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Audit Policy",
+                            "Check":label,"Finding":f"{short_name}: {setting}",
+                            "Details":description,
+                            "Status":sev,"Delta":"","Severity":sev,
+                            "Recommendation":f"Enable '{short_name}' auditing (Success and Failure)" if is_off else ""})
+        if not matched:
+            rows_t = [{"Timestamp":ts,"Cycle":cycle,"Category":"Audit Policy",
+                        "Check":"Audit Policy","Finding":"Unable to query — run as administrator","Details":"",
+                        "Status":"WARNING","Delta":"","Severity":"WARNING","Recommendation":""}]
+    else:
+        out = run_cmd("auditctl -l 2>/dev/null", timeout=5)
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Audit Policy",
+                        "Check":"Linux > auditctl rules","Finding":out[:80] if out else "No rules active",
+                        "Details":"Kernel audit rules loaded by auditd","Status":"OK" if out else "WARNING",
+                        "Delta":"","Severity":"OK" if out else "WARNING",
+                        "Recommendation":"Configure auditd rules (auditctl -l)" if not out else ""})
+    status = "CRITICAL" if any("CRITICAL" in f for f in critical_findings) else \
+             "WARNING" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Audit Policy","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "All critical audit subcategories enabled",
+                   "Recommendation":"Enable critical audit categories" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_event_log_cleared(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if g_os_target == "windows":
+        for evtid, log, desc in [("1102","Security","Security Log Cleared"),
+                                  ("104","System","System Log Cleared")]:
+            out = run_cmd(
+                f'wevtutil qe {log} /q:"*[System[EventID={evtid}]]" /c:5 /rd:true /f:text 2>nul',
+                timeout=10)
+            count = len([l for l in out.splitlines() if l.strip() and "Date" in l])
+            sev = "CRITICAL" if count > 0 else "OK"
+            if count > 0:
+                critical_findings.append(f"LOG CLEARED: {desc} ({count} event(s))")
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Event Log Cleared",
+                            "Check":desc,"Finding":f"{count} occurrence(s)",
+                            "Details":out[:200] if count > 0 else "",
+                            "Status":"CLEARED" if count > 0 else "CLEAN","Delta":"","Severity":sev,
+                            "Recommendation":"Investigate who cleared the log" if count > 0 else ""})
+    else:
+        out = run_cmd("journalctl --list-boots 2>/dev/null | wc -l", timeout=5)
+        try: boots = int(out.strip())
+        except: boots = 0
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Event Log Cleared",
+                        "Check":"Journal Boots","Finding":f"{boots} boot record(s)","Details":"",
+                        "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    status = "CRITICAL" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Event Log Cleared","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "No log clearing detected",
+                   "Recommendation":"Investigate" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_shadow_copies(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if g_os_target == "windows":
+        vss_out  = run_cmd('vssadmin list shadows 2>nul', timeout=15)
+        vss_cnt  = sum(1 for l in vss_out.splitlines() if "Shadow Copy ID" in l)
+        del_out  = run_cmd(
+            'wevtutil qe System /q:"*[System[EventID=524]]" /c:5 /rd:true /f:text 2>nul | findstr "Date"',
+            timeout=10)
+        del_cnt  = len([l for l in del_out.splitlines() if l.strip()])
+        sev_del  = "CRITICAL" if del_cnt > 0 else "OK"
+        if del_cnt > 0:
+            critical_findings.append(f"SHADOW COPIES DELETED: {del_cnt} event(s) — ransomware IOC")
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Shadow Copies",
+                        "Check":"VSS Copies Present","Finding":f"{vss_cnt} shadow copy(ies)",
+                        "Details":"","Status":"OK" if vss_cnt > 0 else "WARNING","Delta":"",
+                        "Severity":"OK" if vss_cnt > 0 else "WARNING",
+                        "Recommendation":"Create VSS snapshots for recovery" if vss_cnt == 0 else ""})
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Shadow Copies",
+                        "Check":"VSS Deletion Events","Finding":f"{del_cnt} deletion event(s)",
+                        "Details":del_out[:200] if del_cnt > 0 else "",
+                        "Status":"CRITICAL" if del_cnt > 0 else "CLEAN","Delta":"","Severity":sev_del,
+                        "Recommendation":"INVESTIGATE — possible ransomware" if del_cnt > 0 else ""})
+    else:
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Shadow Copies",
+                        "Check":"VSS","Finding":"Linux — not applicable","Details":"",
+                        "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    status = "CRITICAL" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Shadow Copies","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "Shadow copies intact",
+                   "Recommendation":"Investigate ransomware IOC" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_system_time(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if g_os_target == "windows":
+        out = run_cmd(
+            'wevtutil qe Security /q:"*[System[EventID=4616]]" /c:5 /rd:true /f:text 2>nul | findstr "Date"',
+            timeout=10)
+        count = len([l for l in out.splitlines() if l.strip()])
+        if count > 0:
+            critical_findings.append(f"SYSTEM TIME CHANGED: {count} event(s)")
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"System Time",
+                        "Check":"Time Change Events (4616)","Finding":f"{count} event(s)",
+                        "Details":"","Status":"FOUND" if count > 0 else "CLEAN","Delta":"",
+                        "Severity":"WARNING" if count > 0 else "OK",
+                        "Recommendation":"Verify time change is expected" if count > 0 else ""})
+        w32 = run_cmd('w32tm /query /status 2>nul', timeout=10)
+        for line in w32.splitlines():
+            if any(k in line for k in ("Stratum","Source","Last Sync")):
+                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"System Time",
+                                "Check":"NTP Status","Finding":line.strip(),"Details":"",
+                                "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    else:
+        out = run_cmd("timedatectl status 2>/dev/null | head -5", timeout=5)
+        for line in out.splitlines():
+            if line.strip():
+                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"System Time",
+                                "Check":"Time Status","Finding":line.strip(),"Details":"",
+                                "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    status = "WARNING" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"System Time","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "No time manipulation",
+                   "Recommendation":"Investigate time change" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+# ─── PHASE 3: STEALTH PERSISTENCE ─────────────────────────────────────────────
+
+def check_registry_autoruns(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if not hasattr(check_registry_autoruns, '_baseline'):
+        check_registry_autoruns._baseline = {}
+    if g_os_target == "windows":
+        RUN_KEYS = [
+            r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run",
+            r"HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce",
+            r"HKLM\Software\Microsoft\Windows\CurrentVersion\Run",
+            r"HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce",
+        ]
+        WINLOGON_KEY = r"HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+        IFEO_KEY = r"HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
+        current = {}
+        for key in RUN_KEYS:
+            out = run_cmd(f'reg query "{key}" 2>nul', timeout=8)
+            for line in out.splitlines():
+                line = line.strip()
+                if not line or line.startswith("HKEY"): continue
+                parts = line.split(None, 2)
+                if len(parts) < 3: continue
+                name, _, value = parts
+                ekey = f"{key}\\{name}"
+                current[ekey] = value[:120]
+                is_new = ekey not in check_registry_autoruns._baseline and check_registry_autoruns._baseline
+                if is_new:
+                    critical_findings.append(f"NEW AUTORUN: {name} = {value[:50]}")
+                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Registry Autoruns",
+                                "Check":name[:40],"Finding":value[:70],"Details":f"Key: {key}",
+                                "Status":"NEW" if is_new else "OK",
+                                "Delta":"NEW ▲" if is_new else "",
+                                "Severity":"WARNING" if is_new else "INFO",
+                                "Recommendation":"Verify this autorun entry" if is_new else ""})
+        # Winlogon Shell/Userinit hijack check
+        for val_name, expected_sub in [("Shell","explorer.exe"),("Userinit","userinit.exe")]:
+            wl = run_cmd(f'reg query "{WINLOGON_KEY}" /v {val_name} 2>nul', timeout=8)
+            for line in wl.splitlines():
+                if val_name in line and "REG_SZ" in line:
+                    parts = line.strip().split(None, 2)
+                    if len(parts) < 3: continue
+                    value = parts[2].strip()
+                    is_sus = expected_sub.lower() not in value.lower()
+                    sev = "CRITICAL" if is_sus else "OK"
+                    if is_sus:
+                        critical_findings.append(f"WINLOGON HIJACK: {val_name} = {value[:60]}")
+                    rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Registry Autoruns",
+                                    "Check":f"Winlogon {val_name}","Finding":value[:70],
+                                    "Details":"Winlogon key","Status":"SUSPICIOUS" if is_sus else "OK",
+                                    "Delta":"","Severity":sev,
+                                    "Recommendation":"INVESTIGATE Winlogon hijack" if is_sus else ""})
+        # IFEO Debugger hijack check
+        ifeo = run_cmd(f'reg query "{IFEO_KEY}" /s /v Debugger 2>nul', timeout=12)
+        for line in ifeo.splitlines():
+            if "Debugger" in line and "REG_SZ" in line:
+                parts = line.strip().split(None, 2)
+                if len(parts) < 3: continue
+                value = parts[2].strip()
+                if not any(lg in value.lower() for lg in ("vsjitdebugger","drwatson","werfault")):
+                    critical_findings.append(f"IFEO HIJACK: Debugger = {value[:60]}")
+                    rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Registry Autoruns",
+                                    "Check":"IFEO Debugger","Finding":value[:70],
+                                    "Details":"Image File Execution Options hijack",
+                                    "Status":"CRITICAL","Delta":"","Severity":"CRITICAL",
+                                    "Recommendation":"INVESTIGATE: possible image hijack persistence"})
+        check_registry_autoruns._baseline = current
+        if not rows_t:
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Registry Autoruns",
+                            "Check":"Autoruns","Finding":"No Run key entries found","Details":"",
+                            "Status":"OK","Delta":"","Severity":"OK","Recommendation":""})
+    else:
+        for fpath in ["/etc/rc.local","/etc/profile"]:
+            if os.path.isfile(fpath):
+                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Registry Autoruns",
+                                "Check":"Startup Script","Finding":fpath,"Details":"",
+                                "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    status = "CRITICAL" if any("CRITICAL" in f for f in critical_findings) else \
+             "WARNING" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Registry Autoruns","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "No suspicious autoruns",
+                   "Recommendation":"Investigate" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_wmi_subscriptions(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if g_os_target == "windows":
+        for cls, fields in [("__EventFilter","Name,Query"),
+                             ("__EventConsumer","Name"),
+                             ("__FilterToConsumerBinding","Filter,Consumer")]:
+            out = run_cmd(
+                f'powershell -NoProfile -Command "Get-CimInstance -Namespace root/subscription '
+                f'-ClassName {cls} | Select-Object {fields} | ConvertTo-Csv -NoTypeInformation" 2>nul',
+                timeout=12)
+            lines = [l.strip() for l in out.splitlines() if l.strip()]
+            for line in lines[1:]:
+                vals = [v.strip('"') for v in line.split(',')]
+                name = vals[0] if vals else ""
+                if not name: continue
+                critical_findings.append(f"WMI {cls}: {name[:50]}")
+                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"WMI Subscriptions",
+                                "Check":cls,"Finding":name[:70],
+                                "Details":",".join(vals[1:])[:80],
+                                "Status":"FOUND","Delta":"","Severity":"CRITICAL",
+                                "Recommendation":f"Investigate WMI subscription: {name[:40]}"})
+        if not rows_t:
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"WMI Subscriptions",
+                            "Check":"WMI Persistence","Finding":"No subscriptions found","Details":"",
+                            "Status":"CLEAN","Delta":"","Severity":"OK","Recommendation":""})
+    else:
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"WMI Subscriptions",
+                        "Check":"WMI","Finding":"Linux — not applicable","Details":"",
+                        "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    status = "CRITICAL" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"WMI Subscriptions","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "No WMI subscriptions",
+                   "Recommendation":"Investigate WMI persistence" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_browser_extensions(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if not hasattr(check_browser_extensions, '_baseline'):
+        check_browser_extensions._baseline = {}
+    import json as _json
+    appdata  = os.environ.get("LOCALAPPDATA","")
+    home     = os.path.expanduser("~")
+    browsers = {}
+    if os.name == 'nt':
+        browsers = {
+            "Chrome": os.path.join(appdata, "Google","Chrome","User Data"),
+            "Edge":   os.path.join(appdata, "Microsoft","Edge","User Data"),
+            "Brave":  os.path.join(appdata, "BraveSoftware","Brave-Browser","User Data"),
+        }
+    else:
+        browsers = {
+            "Chrome":   os.path.join(home,".config","google-chrome"),
+            "Chromium": os.path.join(home,".config","chromium"),
+            "Brave":    os.path.join(home,".config","BraveSoftware","Brave-Browser"),
+        }
+    current_exts = {}
+    for browser, data_dir in browsers.items():
+        if not os.path.isdir(data_dir): continue
+        for profile in ["Default"] + [f"Profile {i}" for i in range(1,6)]:
+            ext_dir = os.path.join(data_dir, profile, "Extensions")
+            if not os.path.isdir(ext_dir): continue
+            try:
+                for ext_id in os.listdir(ext_dir):
+                    ext_path = os.path.join(ext_dir, ext_id)
+                    if not os.path.isdir(ext_path): continue
+                    name = ext_id
+                    try:
+                        for ver in os.listdir(ext_path):
+                            mf = os.path.join(ext_path, ver, "manifest.json")
+                            if os.path.isfile(mf):
+                                with open(mf,"r",encoding="utf-8",errors="ignore") as f:
+                                    name = _json.load(f).get("name",ext_id)[:60]
+                                break
+                    except Exception:
+                        pass
+                    key = f"{browser}/{profile}/{ext_id}"
+                    current_exts[key] = name
+                    is_new = key not in check_browser_extensions._baseline and check_browser_extensions._baseline
+                    if is_new:
+                        critical_findings.append(f"NEW EXT: {browser} — {name[:40]}")
+                    rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Browser Extensions",
+                                    "Check":f"{browser}/{profile}","Finding":name[:70],
+                                    "Details":f"ID: {ext_id}",
+                                    "Status":"NEW" if is_new else "OK",
+                                    "Delta":"NEW ▲" if is_new else "",
+                                    "Severity":"WARNING" if is_new else "INFO",
+                                    "Recommendation":"Verify new browser extension" if is_new else ""})
+            except Exception:
+                pass
+    check_browser_extensions._baseline = current_exts
+    if not rows_t:
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Browser Extensions",
+                        "Check":"Extensions","Finding":"No supported browsers found","Details":"",
+                        "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    status = "WARNING" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Browser Extensions","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else f"{len(current_exts)} extension(s) tracked",
+                   "Recommendation":"Verify new extensions" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+# ─── PHASE 4: BEHAVIOR / C2 INDICATORS ───────────────────────────────────────
+
+def check_beaconing(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if not hasattr(check_beaconing, '_history'):
+        check_beaconing._history = {}  # ip -> [timestamps]
+    local_subnet = get_local_subnet()
+    try:
+        for c in psutil.net_connections(kind='inet'):
+            if c.status != 'ESTABLISHED' or not c.raddr: continue
+            dst = c.raddr.ip
+            if dst.startswith(local_subnet+".") or dst.startswith("127."): continue
+            check_beaconing._history.setdefault(dst, []).append(time.time())
+    except Exception:
+        pass
+    now_t = time.time()
+    beacons = []
+    for ip, ts_list in list(check_beaconing._history.items()):
+        check_beaconing._history[ip] = [t for t in ts_list if now_t - t < 7200]
+        if not check_beaconing._history[ip]:
+            del check_beaconing._history[ip]; continue
+        count = len(check_beaconing._history[ip])
+        if count >= 3:
+            beacons.append((ip, count))
+            critical_findings.append(f"BEACON: {ip} seen {count} times")
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Beaconing",
+                            "Check":"Periodic Connection","Finding":ip,
+                            "Details":f"Seen {count} times in 2h window",
+                            "Status":"BEACON","Delta":"","Severity":"WARNING",
+                            "Recommendation":f"Investigate periodic C2 connection to {ip}"})
+    rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Beaconing",
+                    "Check":"Beacon Monitor",
+                    "Finding":f"{len(check_beaconing._history)} external IPs tracked",
+                    "Details":f"{len(beacons)} potential beacon(s)",
+                    "Status":"WARNING" if beacons else "OK","Delta":"",
+                    "Severity":"WARNING" if beacons else "OK","Recommendation":""})
+    status = "WARNING" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Beaconing","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "No beaconing detected",
+                   "Recommendation":"Investigate beaconing IPs" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_arp_spoofing(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if not hasattr(check_arp_spoofing, '_gw_mac'):
+        check_arp_spoofing._gw_mac = None
+    gw_ip = ""
+    if g_os_target == "windows":
+        gw_out = run_cmd("ipconfig | findstr /i \"Default Gateway\"", timeout=8)
+        for line in gw_out.splitlines():
+            if ":" in line:
+                candidate = line.split(":")[-1].strip()
+                if candidate.count(".") == 3 and not candidate.startswith("0."):
+                    gw_ip = candidate; break
+    else:
+        raw = run_cmd("ip route show default 2>/dev/null", timeout=5)
+        parts = raw.split()
+        if "via" in parts:
+            idx = parts.index("via")
+            if idx + 1 < len(parts): gw_ip = parts[idx+1]
+    if not gw_ip:
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"ARP / Gateway",
+                        "Check":"Gateway","Finding":"Could not determine gateway","Details":"",
+                        "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+        rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"ARP / Gateway","Status":"OK",
+                       "Critical Findings":"No gateway","Recommendation":"Normal"})
+        return rows_t, rows_e
+    if os.name == 'nt':
+        arp_out = run_cmd(f"arp -a {gw_ip}", timeout=5)
+    else:
+        arp_out = run_cmd(f"ip neigh show {gw_ip}", timeout=5)
+    current_mac = ""
+    for line in arp_out.splitlines():
+        parts = line.split()
+        if os.name == 'nt':
+            if len(parts) >= 2 and "-" in parts[1] and len(parts[1]) == 17:
+                current_mac = parts[1].replace("-",":").lower(); break
+        else:
+            if "lladdr" in parts:
+                idx = parts.index("lladdr")
+                if idx + 1 < len(parts):
+                    current_mac = parts[idx+1].lower(); break
+    if not current_mac:
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"ARP / Gateway",
+                        "Check":f"Gateway {gw_ip}","Finding":"MAC not in ARP cache","Details":"",
+                        "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    elif check_arp_spoofing._gw_mac is None:
+        check_arp_spoofing._gw_mac = current_mac
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"ARP / Gateway",
+                        "Check":f"Gateway {gw_ip}","Finding":current_mac,
+                        "Details":"Baseline MAC captured","Status":"OK","Delta":"BASELINE",
+                        "Severity":"INFO","Recommendation":""})
+    elif current_mac != check_arp_spoofing._gw_mac:
+        critical_findings.append(f"GATEWAY MAC CHANGED: {check_arp_spoofing._gw_mac} -> {current_mac}")
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"ARP / Gateway",
+                        "Check":f"Gateway {gw_ip}","Finding":current_mac,
+                        "Details":f"Was: {check_arp_spoofing._gw_mac} | Now: {current_mac}",
+                        "Status":"CHANGED","Delta":"CHANGED","Severity":"CRITICAL",
+                        "Recommendation":"POSSIBLE ARP SPOOFING / MITM ATTACK"})
+        check_arp_spoofing._gw_mac = current_mac
+    else:
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"ARP / Gateway",
+                        "Check":f"Gateway {gw_ip}","Finding":current_mac,
+                        "Details":"MAC unchanged","Status":"OK","Delta":"","Severity":"OK",
+                        "Recommendation":""})
+    status = "CRITICAL" if any(r.get("Severity") == "CRITICAL" for r in rows_t) else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"ARP / Gateway","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else f"Gateway {gw_ip} MAC stable",
+                   "Recommendation":"Investigate MITM" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_process_lineage(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    SUSPICIOUS_WIN = {
+        ("winword.exe","powershell.exe"),("winword.exe","cmd.exe"),
+        ("excel.exe","powershell.exe"),("excel.exe","cmd.exe"),
+        ("outlook.exe","powershell.exe"),("outlook.exe","cmd.exe"),
+        ("chrome.exe","cmd.exe"),("msedge.exe","cmd.exe"),
+        ("firefox.exe","cmd.exe"),("brave.exe","cmd.exe"),
+        ("powershell.exe","mshta.exe"),("powershell.exe","wscript.exe"),
+        ("powershell.exe","cscript.exe"),("cmd.exe","mshta.exe"),
+        ("svchost.exe","powershell.exe"),("wscript.exe","powershell.exe"),
+        ("mshta.exe","powershell.exe"),("regsvr32.exe","powershell.exe"),
+    }
+    SUSPICIOUS_LIN = {
+        ("apache2","bash"),("nginx","bash"),("php-fpm","bash"),
+        ("httpd","bash"),("python3","bash"),("perl","bash"),
+    }
+    if g_os_target == "windows":
+        out = run_cmd(
+            'powershell -NoProfile -Command "Get-CimInstance Win32_Process | '
+            'Select-Object Name,ProcessId,ParentProcessId | '
+            'ConvertTo-Csv -NoTypeInformation" 2>nul', timeout=20)
+        proc_map = {}; proc_parent = {}
+        for line in out.splitlines()[1:]:
+            parts = [p.strip('"') for p in line.split(',')]
+            if len(parts) < 3: continue
+            try:
+                pid  = int(parts[1]); ppid = int(parts[2]) if parts[2] else 0
+                proc_map[pid]    = parts[0].lower()
+                proc_parent[pid] = ppid
+            except Exception: continue
+        for pid, name in proc_map.items():
+            ppid  = proc_parent.get(pid, 0)
+            pname = proc_map.get(ppid, "")
+            if (pname, name) in SUSPICIOUS_WIN:
+                critical_findings.append(f"CHAIN: {pname} -> {name} (PID {pid})")
+                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Process Lineage",
+                                "Check":f"{pname} -> {name}","Finding":f"PID {pid}",
+                                "Details":"Suspicious parent-child chain",
+                                "Status":"SUSPICIOUS","Delta":"","Severity":"CRITICAL",
+                                "Recommendation":f"Investigate: {pname} spawned {name}"})
+    else:
+        out = run_cmd("ps -eo pid,ppid,comm --no-headers 2>/dev/null", timeout=10)
+        proc_map = {}; proc_parent = {}
+        for line in out.splitlines():
+            parts = line.split()
+            if len(parts) < 3: continue
+            try:
+                pid = int(parts[0]); ppid = int(parts[1])
+                proc_map[pid] = parts[2].lower(); proc_parent[pid] = ppid
+            except Exception: continue
+        for pid, name in proc_map.items():
+            ppid  = proc_parent.get(pid, 0)
+            pname = proc_map.get(ppid, "")
+            if (pname, name) in SUSPICIOUS_LIN:
+                critical_findings.append(f"WEB SHELL: {pname} -> {name}")
+                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Process Lineage",
+                                "Check":f"{pname} -> {name}","Finding":f"PID {pid}",
+                                "Details":"Web server spawned shell","Status":"SUSPICIOUS",
+                                "Delta":"","Severity":"CRITICAL",
+                                "Recommendation":f"Investigate: web process spawned shell"})
+    if not critical_findings:
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Process Lineage",
+                        "Check":"Process Lineage","Finding":"No suspicious chains detected",
+                        "Details":"","Status":"CLEAN","Delta":"","Severity":"OK","Recommendation":""})
+    status = "CRITICAL" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Process Lineage","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "No suspicious chains",
+                   "Recommendation":"Investigate chains" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_ransomware_indicators(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    RANSOM_EXTS = {
+        ".locked",".encrypted",".enc",".crypt",".crypted",".crypto",
+        ".cerber",".zepto",".locky",".wnry",".wncry",".wannacry",
+        ".ryuk",".revil",".maze",".conti",".darkside",".blackcat",
+        ".lockbit",".blackbasta",".hive",".ransomware",".pay2key",
+    }
+    RANSOM_NOTES = {"readme.txt","!decrypt","recover","ransom","_readme.txt",
+                    "!!!readme!!!.txt","decrypt_instructions.txt","how to decrypt"}
+    scan_dirs = []
+    for d in ["Desktop","Documents","Downloads"]:
+        p = os.path.join(os.path.expanduser("~"), d)
+        if os.path.isdir(p): scan_dirs.append(p)
+    suspicious = []; notes = []
+    for scan_dir in scan_dirs:
+        try:
+            for fname in os.listdir(scan_dir):
+                ext   = os.path.splitext(fname)[1].lower()
+                flow  = fname.lower()
+                fpath = os.path.join(scan_dir, fname)
+                if ext in RANSOM_EXTS:
+                    suspicious.append(fpath)
+                if any(n in flow for n in RANSOM_NOTES):
+                    notes.append(fpath)
+        except Exception:
+            pass
+    if suspicious:
+        critical_findings.append(f"RANSOMWARE FILES: {len(suspicious)} suspicious file(s)")
+        for fp in suspicious[:5]:
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Ransomware IOC",
+                            "Check":"Encrypted File","Finding":os.path.basename(fp)[:70],
+                            "Details":fp[:100],"Status":"CRITICAL","Delta":"","Severity":"CRITICAL",
+                            "Recommendation":"STOP all I/O — possible ransomware active"})
+    if notes:
+        critical_findings.append(f"RANSOM NOTES: {len(notes)} file(s)")
+        for fp in notes[:3]:
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Ransomware IOC",
+                            "Check":"Ransom Note","Finding":os.path.basename(fp)[:70],
+                            "Details":fp[:100],"Status":"CRITICAL","Delta":"","Severity":"CRITICAL",
+                            "Recommendation":"RANSOM NOTE FOUND — isolate system immediately"})
+    if not critical_findings:
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Ransomware IOC",
+                        "Check":"Ransomware Scan","Finding":"No indicators found",
+                        "Details":f"Scanned: {', '.join(os.path.basename(d) for d in scan_dirs)}",
+                        "Status":"CLEAN","Delta":"","Severity":"OK","Recommendation":""})
+    status = "CRITICAL" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Ransomware IOC","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "No ransomware indicators",
+                   "Recommendation":"ISOLATE SYSTEM" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+def check_webcam_mic(cycle):
+    ts = now_str(); rows_t = []; rows_e = []; critical_findings = []
+    if g_os_target == "windows":
+        for dev_class, label in [("Camera","Webcam"),("AudioEndpoint","Microphone")]:
+            out = run_cmd(
+                f'powershell -NoProfile -Command "Get-PnpDevice -Class {dev_class} '
+                f'-PresentOnly | Select-Object Status,FriendlyName | '
+                f'ConvertTo-Csv -NoTypeInformation" 2>nul', timeout=12)
+            for line in out.splitlines()[1:]:
+                parts = [p.strip('"') for p in line.split(',')]
+                if len(parts) < 2: continue
+                dev_status, dev_name = parts[0], parts[1]
+                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Webcam / Mic",
+                                "Check":label,"Finding":dev_name[:60],
+                                "Details":f"Status: {dev_status}",
+                                "Status":dev_status,"Delta":"","Severity":"INFO","Recommendation":""})
+        for sense, reg_sub in [("Camera","webcam"),("Microphone","microphone")]:
+            reg = (r"HKCU\Software\Microsoft\Windows\CurrentVersion"
+                   r"\CapabilityAccessManager\ConsentStore\\" + reg_sub)
+            out = run_cmd(f'reg query "{reg}" /s 2>nul', timeout=10)
+            accessed = [l.strip()[:80] for l in out.splitlines()
+                        if "LastUsedTimeStart" in l and "REG_QWORD" in l]
+            if accessed:
+                rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Webcam / Mic",
+                                "Check":f"{sense} Recent Access",
+                                "Finding":f"{len(accessed)} app(s) accessed {sense.lower()}",
+                                "Details":"; ".join(accessed[:3])[:150],
+                                "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+        if not rows_t:
+            rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Webcam / Mic",
+                            "Check":"Camera/Mic","Finding":"No devices or access data found","Details":"",
+                            "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    else:
+        out = run_cmd("ls /dev/video* 2>/dev/null", timeout=5)
+        rows_t.append({"Timestamp":ts,"Cycle":cycle,"Category":"Webcam / Mic",
+                        "Check":"Video Devices","Finding":out.strip() if out else "None","Details":"",
+                        "Status":"INFO","Delta":"","Severity":"INFO","Recommendation":""})
+    status = "WARNING" if critical_findings else "OK"
+    rows_e.append({"Timestamp":ts,"Cycle":cycle,"Category":"Webcam / Mic","Status":status,
+                   "Critical Findings":"; ".join(critical_findings) if critical_findings else "Camera/mic status logged",
+                   "Recommendation":"Review" if critical_findings else "Normal"})
+    return rows_t, rows_e
+
+
+# ─── LIVE WATCHMAN DASHBOARD (Textual, scrollable) ────────────────────────────
+_CHECK_LABELS = [
+    # Phase 1 — original 21 checks
+    "Active Connections", "Listening Ports", "Extended Port Scan", "Net Processes",
+    "Privileged Processes", "Resources (CPU/RAM)", "Logged Users", "Local Users & Admins",
+    "RDP / Remote Sessions", "Services", "Firewall", "USB Devices", "DNS & Gateway",
+    "Scheduled Tasks", "LAN Devices (ARP)", "System Events", "Security Events Detail",
+    "Network Shares", "Startup Items", "Recent Software", "File Integrity",
+    # Phase 2 — posture + anti-forensic
+    "Defender / AV", "Windows Update", "BitLocker / SecureBoot",
+    "Audit Policy", "Event Log Cleared", "Shadow Copies", "System Time",
+    # Phase 3 — stealth persistence
+    "Registry Autoruns", "WMI Subscriptions", "Browser Extensions",
+    # Phase 4 — behavior / C2
+    "Beaconing", "ARP / Gateway", "Process Lineage", "Ransomware IOC", "Webcam / Mic",
+]
+_DOT = {"OK": "[green]\u25cf[/]", "WARNING": "[yellow]\u25cf[/]",
+        "CRITICAL": "[bold red]\u25cf[/]", "ERR": "[red]\u2717[/]", "-": "[dim]\u25cf[/]"}
+
+
+class _WatchmanApp(App):
+    CSS = """
+    Screen { background: #0a0a0a; }
+    #hdr { dock: top; height: 3; background: #07140a; border: heavy green; color: white; content-align: left middle; padding: 0 1; }
+    #hdr.crit { border: heavy red; }
+    #ftr { dock: bottom; height: 3; background: #07140a; border: heavy green; color: white; padding: 0 1; content-align: left middle; }
+    .panel { border: round #2a6f8f; margin: 1 1 0 1; padding: 0 1; height: auto; }
+    .alert { border: round red; margin: 1 1 0 1; padding: 0 1; height: auto; }
+    """
+    BINDINGS = [Binding("q", "stop", "Stop"), Binding("ctrl+c", "stop", "Stop")]
+
+    def __init__(self, wait_seconds, start_time, duration_end, local_ip, local_subnet,
+                 iface, cycle_num, cycle_tech, check_status, get_lan_now):
+        super().__init__()
+        self.wait_seconds = wait_seconds
+        self.start_time   = start_time
+        self.duration_end = duration_end
+        self.local_ip     = local_ip
+        self.local_subnet = local_subnet
+        self.iface        = iface
+        self.cycle_num    = cycle_num
+        self.cycle_tech   = cycle_tech
+        self.check_status = check_status
+        self.get_lan_now  = get_lan_now
+        self.prev_sent    = 0
+        self.prev_recv    = 0
+        self.activity_log = {}
+        self.baseline_lan = set()
+
+    def compose(self):
+        yield Static(id="hdr")
+        with VerticalScroll():
+            yield Static(id="checks",   classes="panel")
+            yield Static(id="alerts",   classes="alert")
+            yield Static(id="conn",     classes="panel")
+            yield Static(id="usb",      classes="panel")
+            yield Static(id="sessions", classes="panel")
+            yield Static(id="procs",    classes="panel")
+            yield Static(id="ports",    classes="panel")
+            yield Static(id="lan",      classes="panel")
+        yield Static(id="ftr")
+
+    def on_mount(self):
+        try:
+            s, r, _, _ = get_net_stats()
+            self.prev_sent, self.prev_recv = s, r
+        except Exception:
+            pass
+        try:
+            self.baseline_lan = {d["ip"] for d in self.get_lan_now()}
+        except Exception:
+            self.baseline_lan = set()
+        self._render_security()
+        self.set_interval(2.0, self.tick)
+        self.tick()
+
+    # ---- helpers -------------------------------------------------------------
+    def _rows_for(self, *cats):
+        return [r for r in self.cycle_tech if r.get("Category") in cats]
+
+    def _text_panel(self, title, *cats):
+        rows = self._rows_for(*cats)
+        if not rows:
+            return "[bold cyan]%s[/]\n\n  [dim](no findings this cycle)[/]" % title
+        lines = []
+        for r in rows[:60]:
+            sev = r.get("Severity", "OK")
+            col = {"CRITICAL": "bold red", "WARNING": "yellow"}.get(sev, "white")
+            fnd = str(r.get("Finding", ""))[:64]
+            det = str(r.get("Details", ""))
+            extra = ("  \u2014 " + det[:24]) if det else ""
+            lines.append("  [%s]%s[/]%s" % (col, fnd, extra))
+        return "[bold cyan]%s[/]\n\n%s" % (title, "\n".join(lines))
+
+    # ---- static security panels (from the last cycle) ------------------------
+    def _render_security(self):
+        cells = []
+        for lbl in _CHECK_LABELS:
+            st = self.check_status.get(lbl, "-")
+            cells.append("%s %s" % (_DOT.get(st, _DOT["-"]), ("%-22s" % lbl)))
+        grid = "\n".join("   ".join(cells[i:i+3]) for i in range(0, len(cells), 3))
+        self.query_one("#checks", Static).update(
+            "[bold cyan]SECURITY CHECKS[/]  [dim](cycle %s)[/]\n\n%s" % (self.cycle_num, grid))
+
+        alerts = [r for r in self.cycle_tech if r.get("Severity") in ("CRITICAL", "WARNING")]
+        if alerts:
+            lines = []
+            for r in alerts:
+                sev = r.get("Severity")
+                tag = "[bold red]CRITICAL[/]" if sev == "CRITICAL" else "[yellow]WARNING [/]"
+                fnd = str(r.get("Finding", ""))[:70]
+                lines.append("  %s [bold]%s:[/] %s" % (tag, r.get("Category", ""), fnd))
+            body = "\n".join(lines)
+        else:
+            body = "  [green]No active alerts \u2014 all clear.[/]"
+        self.query_one("#alerts", Static).update(
+            "[bold red]\u26a0 ACTIVE ALERTS (%d)[/]\n\n%s" % (len(alerts), body))
+
+        usb = Table(box=box.SIMPLE_HEAD, expand=True, pad_edge=False, show_edge=False,
+                    padding=(0, 1), title="[bold magenta]USB DEVICES",
+                    title_justify="left")
+        usb.add_column(" ", width=1); usb.add_column("DEVICE", no_wrap=True)
+        usb.add_column("STATUS", no_wrap=True)
+        urows = self._rows_for("USB Devices")
+        if not urows:
+            usb.add_row(" ", Text("(no cycle data yet)", style="dim"), "")
+        for r in urows:
+            new = "NEW" in str(r.get("Delta", ""))
+            usb.add_row(Text("\u2605" if new else " ", style="bold red" if new else ""),
+                        Text(str(r.get("Finding", ""))[:60], style="bold red" if new else "white"),
+                        Text(str(r.get("Status", "")) + ("  \u25c4 NEW" if new else ""),
+                             style="bold red" if new else "green"))
+        self.query_one("#usb", Static).update(usb)
+
+        self.query_one("#sessions", Static).update(
+            self._text_panel("SESSIONS / USERS", "Logged Users", "RDP Sessions"))
+        self.query_one("#procs", Static).update(
+            self._text_panel("PROCESSES (privileged / network)", "Privileged Processes", "Net Processes"))
+        self.query_one("#ports", Static).update(
+            self._text_panel("LISTENING / EXPOSED PORTS", "Listening Ports", "Extended Port Scan"))
+
+    # ---- live refresh --------------------------------------------------------
+    def tick(self):
+        elapsed = time.time() - self.start_time
+        left    = max(0, self.wait_seconds - int(elapsed))
+        if g_stop_event.is_set() or left <= 0:
+            self.exit()
+            return
+        m, s = divmod(left, 60)
+
+        try:
+            cur_sent, cur_recv, _, _ = get_net_stats()
+            up   = max(0, (cur_sent - self.prev_sent)) // 1024
+            down = max(0, (cur_recv - self.prev_recv)) // 1024
+            self.prev_sent, self.prev_recv = cur_sent, cur_recv
+        except Exception:
+            up = down = 0
+        try:
+            conns = get_live_connections()
+        except Exception:
+            conns = []
+        try:
+            lan_devices = self.get_lan_now()
+        except Exception:
+            lan_devices = []
+
+        active_lan = {}
+        try:
+            for dip, cnt in get_connection_bytes().items():
+                if dip.startswith(self.local_subnet + ".") and dip != self.local_ip:
+                    if cnt > 0:
+                        self.activity_log[dip] = self.activity_log.get(dip, 0) + 2
+                        active_lan[dip] = True
+                    elif self.activity_log.get(dip, 0) > 0:
+                        self.activity_log[dip] = max(0, self.activity_log[dip] - 2)
+        except Exception:
+            pass
+
+        new_ips = {d["ip"] for d in lan_devices
+                   if d["ip"] not in self.baseline_lan
+                   and not d["ip"].startswith(("224.", "239.", "169.254."))}
+
+        established = [c for c in conns if c["status"] == "ESTABLISHED"]
+        listening   = [c for c in conns if c["status"] == "LISTEN"]
+        other       = [c for c in conns if c["status"] not in ("ESTABLISHED", "LISTEN")]
+
+        worst = "CRITICAL" if "CRITICAL" in self.check_status.values() else (
+                "WARNING" if "WARNING" in self.check_status.values() else "OK")
+        tcol  = {"OK": "bold green", "WARNING": "bold yellow", "CRITICAL": "bold red"}[worst]
+        tsk   = ("tshark \u2192 [%s]" % self.iface) if g_tshark_path else "tshark: off"
+        sess  = ""
+        if self.duration_end:
+            tl = max(0, int(self.duration_end - time.time()))
+            th, tm = divmod(tl, 3600); tm, tss = divmod(tm, 60)
+            sess = "  [dim]Session ends %02d:%02d:%02d[/]" % (th, tm, tss)
+        hdr = self.query_one("#hdr", Static)
+        hdr.update(
+            "[bold cyan]\u23f1 IT ANGEL[/] [bold white]WATCHMAN[/]   Next cycle [bold cyan]%02d:%02d[/]"
+            "    THREAT: [%s]%s[/]    [bold green]%s[/]  [cyan]\u2191%dKB \u2193%dKB/s[/]  [dim]%s[/]%s"
+            % (m, s, tcol, worst, self.local_ip, up, down, tsk, sess))
+        hdr.set_class(worst == "CRITICAL", "crit")
+
+        ct = Table(box=box.SIMPLE_HEAD, expand=True, pad_edge=False, show_edge=False,
+                   padding=(0, 1), title="[bold yellow]CONNECTIONS (TCP) \u2014 %d" % len(conns),
+                   title_justify="left")
+        ct.add_column(" ", width=1); ct.add_column("PROCESS", no_wrap=True)
+        ct.add_column("SOURCE", no_wrap=True); ct.add_column("DESTINATION", no_wrap=True)
+        ct.add_column("P", width=3); ct.add_column("STATUS", no_wrap=True)
+        for c in (established + other + listening):
+            dst_ip = c["dst"].split(":")[0] if c["dst"] else ""
+            is_lan = dst_ip.startswith(self.local_subnet + ".")
+            is_act = dst_ip in active_lan
+            mine   = self.local_ip in c["src"]
+            if is_act and is_lan:
+                col = "magenta"; mk = Text("\u2605", style="magenta")
+            elif is_lan and c["status"] == "ESTABLISHED":
+                col = "yellow";  mk = Text("\u25ba", style="yellow")
+            elif mine and c["status"] == "ESTABLISHED":
+                col = "cyan";    mk = Text("\u25ba", style="green")
+            else:
+                col = "white";   mk = Text(" ")
+            st  = c["status"]
+            stc = "green" if st == "ESTABLISHED" else ("cyan" if st == "LISTEN" else "yellow")
+            ct.add_row(mk, Text(c["proc"], style=col), Text(c["src"]), Text(c["dst"]),
+                       Text(c["proto"][:3]), Text(st, style=stc))
+        if not conns:
+            ct.add_row(" ", Text("No active connections", style="dim"), "", "", "", "")
+        self.query_one("#conn", Static).update(ct)
+
+        lt = Table(box=box.SIMPLE_HEAD, expand=True, pad_edge=False, show_edge=False,
+                   padding=(0, 1),
+                   title="[bold white]LAN DEVICES \u2014 %s.0/24" % self.local_subnet,
+                   title_justify="left")
+        lt.add_column(" ", width=1); lt.add_column("IP ADDRESS", no_wrap=True)
+        lt.add_column("MAC / NOTE", no_wrap=True)
+        seen = set()
+        for d in lan_devices:
+            ip = d["ip"]; mac = d["mac"]
+            if ip.startswith(("169.254.", "224.", "239.")) or ip in seen:
+                continue
+            seen.add(ip)
+            if ip in new_ips:
+                lt.add_row(Text("\u2605", style="bold red"), Text(ip, style="bold red"),
+                           Text(mac + "  \u25c4 NEW", style="bold red"))
+            elif ip in active_lan:
+                lt.add_row(Text("\u2605", style="magenta"), Text(ip, style="magenta"), Text(mac))
+            elif ip == self.local_ip:
+                lt.add_row(Text("\u25ba", style="green"), Text(ip, style="green"), Text(mac, style="dim"))
+            else:
+                lt.add_row(Text(" "), Text(ip, style="cyan"), Text(mac))
+        self.query_one("#lan", Static).update(lt)
+
+        # ── live USB refresh (same 2s cadence as connections/LAN) ─────────────
+        try:
+            utech, _ = check_usb_devices(self.cycle_num)
+            urows = [r for r in utech if r.get("Category") == "USB Devices"]
+        except Exception:
+            urows = []
+        usb = Table(box=box.SIMPLE_HEAD, expand=True, pad_edge=False, show_edge=False,
+                    padding=(0, 1), title="[bold magenta]USB DEVICES",
+                    title_justify="left")
+        usb.add_column(" ", width=1); usb.add_column("DEVICE", no_wrap=True)
+        usb.add_column("STATUS", no_wrap=True)
+        if not urows:
+            usb.add_row(" ", Text("(no devices)", style="dim"), "")
+        for r in urows:
+            new = "NEW" in str(r.get("Delta", ""))
+            usb.add_row(Text("\u2605" if new else " ", style="bold red" if new else ""),
+                        Text(str(r.get("Finding", ""))[:60], style="bold red" if new else "white"),
+                        Text(str(r.get("Status", "")) + ("  \u25c4 NEW" if new else ""),
+                             style="bold red" if new else "green"))
+        self.query_one("#usb", Static).update(usb)
+
+        self.query_one("#ftr", Static).update(
+            "[white]%d established  %d listening[/]   [green]\u25ba[/] this machine  "
+            "[magenta]\u2605[/] LAN  [red]\u25cf[/] critical  [yellow]\u25cf[/] warning   "
+            "[dim]\u2502 scroll \u2191\u2193 \u2502 q = stop \u2502 refresh 2s[/]"
+            % (len(established), len(listening)))
+
+    def action_stop(self):
+        g_stop_event.set()
+        self.exit()
+
+
+def show_live_traffic_and_countdown(wait_seconds, cycle_num, duration_end=None,
+                                    cycle_tech=None, check_status=None):
+    """Live Watchman dashboard between cycles (Textual, scrollable).
+
+    Network / LAN / throughput refresh every 2s; the security panels reflect the
+    last completed cycle. tshark capture and Excel output are unchanged.
     """
     local_ip     = get_local_ip()
     local_subnet = get_local_subnet()
     iface        = get_tshark_interface()
     start_time   = time.time()
+    cycle_tech   = cycle_tech or []
+    check_status = check_status or {}
 
-    # ── Start tshark background capture ───────────────────────────────────────
+    # tshark background capture (unchanged)
     tshark_rows = []
     tshark_done = threading.Event()
     if g_tshark_path:
-        tshark_thread = threading.Thread(
-            target=capture_tshark_background,
+        threading.Thread(target=capture_tshark_background,
             args=(cycle_num, wait_seconds - 5, tshark_rows, tshark_done),
-            daemon=True
-        )
-        tshark_thread.start()
+            daemon=True).start()
 
-    # ── LAN devices — cached and refreshed in background every 10s ────────────
-    _lan_cache      = list(get_lan_devices())
-    _lan_cache_lock = threading.Lock()
+    # LAN cache refreshed in the background; stops when the panel closes
+    _lan_cache  = list(get_lan_devices())
+    _lan_lock   = threading.Lock()
+    _panel_done = threading.Event()
 
     def _refresh_lan_loop():
         nonlocal _lan_cache
-        while not g_stop_event.is_set():
-            for _ in range(5):          # wait 10s (5 x 2s)
-                if g_stop_event.is_set():
+        while not _panel_done.is_set() and not g_stop_event.is_set():
+            for _ in range(5):
+                if _panel_done.is_set() or g_stop_event.is_set():
                     return
                 time.sleep(2)
             try:
                 fresh = get_lan_devices()
-                with _lan_cache_lock:
+                with _lan_lock:
                     _lan_cache = fresh
             except Exception:
                 pass
 
-    lan_bg = threading.Thread(target=_refresh_lan_loop, daemon=True)
-    lan_bg.start()
+    threading.Thread(target=_refresh_lan_loop, daemon=True).start()
 
     def _get_lan_now():
-        with _lan_cache_lock:
+        with _lan_lock:
             return list(_lan_cache)
 
-    # ── Event fired when countdown reaches 0 ──────────────────────────────────
-    _display_done = threading.Event()
+    app = _WatchmanApp(wait_seconds, start_time, duration_end, local_ip, local_subnet,
+                       iface, cycle_num, cycle_tech, check_status, _get_lan_now)
+    try:
+        app.run()
+    except KeyboardInterrupt:
+        g_stop_event.set()
+    finally:
+        _panel_done.set()
 
-    # ── Display loop — runs in its own thread so main thread never sleeps ─────
-    def _display_loop():
-        prev_sent, prev_recv, _, _ = get_net_stats()
-        baseline_lan  = {d["ip"] for d in _get_lan_now()}
-        prev_conn_map = get_connection_bytes()
-        activity_log  = {}
-        REFRESH = 2
-
-        try:
-            while True:
-                elapsed = time.time() - start_time
-                left    = max(0, wait_seconds - int(elapsed))
-                m, s    = divmod(left, 60)
-                if g_stop_event.is_set() or left <= 0:
-                    break
-
-                conns        = get_live_connections()
-                lan_devices  = _get_lan_now()
-                cur_sent, cur_recv, _, _ = get_net_stats()
-                delta_up     = max(0, (cur_sent - prev_sent)) // 1024
-                delta_down   = max(0, (cur_recv - prev_recv)) // 1024
-                prev_sent, prev_recv = cur_sent, cur_recv
-
-                new_devices = [d for d in lan_devices
-                               if d["ip"] not in baseline_lan
-                               and not d["ip"].startswith("224.")
-                               and not d["ip"].startswith("239.")
-                               and not d["ip"].startswith("169.254.")]
-
-                cur_conn_map = get_connection_bytes()
-                active_lan   = {}
-                for dst_ip, count in cur_conn_map.items():
-                    if dst_ip.startswith(local_subnet + ".") and dst_ip != local_ip:
-                        if count > 0:
-                            activity_log[dst_ip] = activity_log.get(dst_ip, 0) + REFRESH
-                            active_lan[dst_ip] = True
-                        elif dst_ip in activity_log and activity_log[dst_ip] > 0:
-                            activity_log[dst_ip] = max(0, activity_log[dst_ip] - REFRESH)
-                prev_conn_map = cur_conn_map
-
-                lines_printed = getattr(_display_loop, '_lines', 0)
-                if lines_printed > 0:
-                    print(f"\033[{lines_printed}A\033[J", end="", flush=True)
-
-                frame_lines = 0
-                def pr(text=""):
-                    nonlocal frame_lines
-                    print(text)
-                    frame_lines += 1
-
-                remain_label = ""
-                if duration_end:
-                    tl = max(0, int(duration_end - time.time()))
-                    th, tm2 = divmod(tl, 3600); tm2, ts2 = divmod(tm2, 60)
-                    remain_label = f"  {DIM}| Session ends: {th:02d}:{tm2:02d}:{ts2:02d}{RESET}"
-
-                pr(f"  {CYAN}{chr(9472)*74}{RESET}")
-                pr(f"  {WHITE}\u23f1  Next cycle in: {CYAN}{m:02d}:{s:02d}{RESET}  "
-                   f"{GREEN}This machine: {local_ip}{RESET}{remain_label}")
-                pr(f"  {WHITE}psutil live  "
-                   + (f"| tshark \u2192 [{iface}]" if g_tshark_path else "| tshark: not installed")
-                   + f"  {CYAN}\u2191{delta_up}KB  \u2193{delta_down}KB/s{RESET}")
-                pr(f"  {CYAN}{chr(9472)*74}{RESET}")
-
-                for dst_ip, secs in activity_log.items():
-                    if secs > 0:
-                        procs = [c["proc"] for c in conns if dst_ip in c.get("dst","")]
-                        proc_label = procs[0] if procs else "System"
-                        bar = "\u2588" * min(int(secs / 2), 20)
-                        pr(f"  {MAGENTA}\u2605 ACTIVITY \u2192 {dst_ip:<18} "
-                           f"via {proc_label:<14} [{bar}]{RESET}")
-
-                pr(f"  {YELLOW}{'PROCESS':<15} {'SOURCE':<21} {'DESTINATION':<21} {'P':<4} {'STATUS'}{RESET}")
-                pr(f"  {YELLOW}{chr(9472)*74}{RESET}")
-
-                established = [c for c in conns if c["status"] == "ESTABLISHED"]
-                listening   = [c for c in conns if c["status"] == "LISTEN"]
-                other       = [c for c in conns if c["status"] not in ("ESTABLISHED","LISTEN")]
-                shown = 0
-
-                for c in (established + other + listening)[:14]:
-                    proc   = c["proc"][:13]
-                    src    = c["src"][:19]
-                    dst    = c["dst"][:19]
-                    proto  = c["proto"][:3]
-                    status = c["status"][:10]
-                    mine   = local_ip in c["src"]
-                    dst_ip_only = c["dst"].split(":")[0] if c["dst"] else ""
-                    is_lan_dst = dst_ip_only.startswith(local_subnet + ".")
-                    is_active  = dst_ip_only in active_lan
-
-                    if is_active and is_lan_dst:
-                        color = MAGENTA; marker = f"{MAGENTA}\u2605{RESET} "
-                    elif is_lan_dst and c["status"] == "ESTABLISHED":
-                        color = YELLOW;  marker = f"{YELLOW}\u25ba{RESET} "
-                    elif mine and c["status"] == "ESTABLISHED":
-                        color = CYAN;    marker = f"{GREEN}\u25ba{RESET} "
-                    elif c["status"] == "ESTABLISHED":
-                        color = WHITE;   marker = "  "
-                    elif c["status"] == "LISTEN":
-                        color = WHITE;   marker = "  "
-                    else:
-                        color = YELLOW;  marker = "  "
-
-                    pr(f"  {marker}{color}{proc:<15} {src:<21} {dst:<21} {proto:<4} {status}{RESET}")
-                    shown += 1
-
-                if shown == 0:
-                    pr(f"  {WHITE}  No active connections{RESET}")
-
-                pr(f"  {YELLOW}{chr(9472)*74}{RESET}")
-                pr(f"  {WHITE}{len(established)} established  {len(listening)} listening  "
-                   f"| {GREEN}\u25ba = this machine  {MAGENTA}\u2605 = LAN activity{RESET}  "
-                   f"{WHITE}| refreshes every {REFRESH}s{RESET}")
-
-                pr(f"  {CYAN}{chr(9472)*74}{RESET}")
-                pr(f"  {WHITE}LAN Devices ({len(lan_devices)} on {local_subnet}.0/24):{RESET}")
-
-                if new_devices:
-                    for d in new_devices:
-                        pr(f"  {RED}\u2605 NEW DEVICE DETECTED: {d['ip']:<18} MAC: {d['mac']}{RESET}")
-
-                shown_ips = set()
-                for d in lan_devices:
-                    ip  = d["ip"]
-                    mac = d["mac"]
-                    if ip.startswith("169.254.") or ip.startswith("224.") or ip.startswith("239."):
-                        continue
-                    if ip in shown_ips:
-                        continue
-                    shown_ips.add(ip)
-                    is_me       = (ip == local_ip)
-                    is_active_d = ip in active_lan
-                    is_new      = ip in {nd["ip"] for nd in new_devices}
-
-                    if is_new:
-                        color = RED;     marker = f"{RED}\u2605{RESET} "
-                    elif is_active_d:
-                        color = MAGENTA; marker = f"{MAGENTA}\u2605{RESET} "
-                    elif is_me:
-                        color = GREEN;   marker = f"{GREEN}\u25ba{RESET} "
-                    else:
-                        color = WHITE;   marker = "  "
-
-                    pr(f"  {marker}{color}{ip:<18}{RESET}  {WHITE}{mac}{RESET}")
-
-                pr(f"  {CYAN}{chr(9472)*74}{RESET}")
-                elapsed_total = int(time.time() - start_time)
-                eh, em2 = divmod(elapsed_total, 3600); em2, es = divmod(em2, 60)
-                pr(f"  \u25cf Next cycle: {CYAN}{m:02d}:{s:02d}{RESET}"
-                   + (f"  {DIM}Session ends: {remain_label.strip()}{RESET}" if remain_label else ""))
-
-                _display_loop._lines = frame_lines
-                time.sleep(REFRESH)
-
-        except KeyboardInterrupt:
-            g_stop_event.set()
-        except Exception:
-            pass
-        finally:
-            lines_printed = getattr(_display_loop, '_lines', 0)
-            if lines_printed > 0:
-                print(f"\033[{lines_printed}A\033[J", end="", flush=True)
-            _display_loop._lines = 0
-            _display_done.set()   # Always fire — guarantees main thread unblocks
-
-    # ── Launch display in thread; main thread waits on Event (never sleeps) ───
-    display_thread = threading.Thread(target=_display_loop, daemon=True)
-    display_thread.start()
-
-    # Poll with 1s timeout so Ctrl+C is caught quickly.
-    # Hard timeout = wait_seconds + 30s as absolute safety net against freeze.
-    deadline = time.time() + wait_seconds + 30
-    while not _display_done.wait(timeout=1.0):
-        if g_stop_event.is_set():
-            break
-        if time.time() >= deadline:
-            # Safety: force the event so we never block the cycle loop
-            _display_done.set()
-            break
-
-    # ── Wait for tshark to finish saving (should be nearly instant now) ─────────
+    # tshark wrap-up (unchanged)
     if g_tshark_path:
-        # With streaming output, tshark finishes at the same time as the countdown.
-        # Give it at most 5s to flush and save — it should be done already.
         tshark_done.wait(timeout=5)
         if tshark_rows:
             print(f"  {GREEN}\u2714 {len(tshark_rows)} packets \u2192 Network Traffic sheet.{RESET}")
@@ -2235,6 +3368,7 @@ def show_live_traffic_and_countdown(wait_seconds, cycle_num, duration_end=None):
 def run_full_cycle(cycle_num):
     """Run ALL checks every cycle."""
     all_tech = []; all_exec = []
+    check_status = {}
 
     def run_check(label, fn, *args):
         print(f"    {DIM}[ {label} ]{RESET}", end="\r")
@@ -2245,14 +3379,17 @@ def run_full_cycle(cycle_num):
             warn = any(r.get("Severity") == "WARNING"  for r in t)
             icon = f"{RED}●{RESET}" if crit else (f"{YELLOW}●{RESET}" if warn else f"{GREEN}●{RESET}")
             stat = "CRITICAL" if crit else ("WARNING" if warn else "OK")
+            check_status[label] = stat
             print(f"    {icon} {WHITE}{label:<35}{RESET} {stat}")
         except Exception as ex:
+            check_status[label] = "ERR"
             print(f"    {RED}✗ {label}: {ex}{RESET}")
 
     print(f"\n  {CYAN}{'─'*60}{RESET}")
     print(f"  {WHITE}Cycle {cycle_num} — {now_str()}{RESET}")
     print(f"  {CYAN}{'─'*60}{RESET}\n")
 
+    # Phase 1 — original checks
     run_check("Active Connections",      check_active_connections,     cycle_num)
     run_check("Listening Ports",         check_listening_ports,        cycle_num)
     run_check("Extended Port Scan",      check_extended_ports,         cycle_num)
@@ -2274,11 +3411,29 @@ def run_full_cycle(cycle_num):
     run_check("Startup Items",           check_startup_items,          cycle_num)
     run_check("Recent Software",         check_recent_software,        cycle_num)
     run_check("File Integrity",          check_system_file_integrity,  cycle_num)
+    # Phase 2 — posture + anti-forensic
+    run_check("Defender / AV",           check_defender_status,        cycle_num)
+    run_check("Windows Update",          check_windows_update,         cycle_num)
+    run_check("BitLocker / SecureBoot",  check_bitlocker_secureboot,   cycle_num)
+    run_check("Audit Policy",            check_audit_policy,           cycle_num)
+    run_check("Event Log Cleared",       check_event_log_cleared,      cycle_num)
+    run_check("Shadow Copies",           check_shadow_copies,          cycle_num)
+    run_check("System Time",             check_system_time,            cycle_num)
+    # Phase 3 — stealth persistence
+    run_check("Registry Autoruns",       check_registry_autoruns,      cycle_num)
+    run_check("WMI Subscriptions",       check_wmi_subscriptions,      cycle_num)
+    run_check("Browser Extensions",      check_browser_extensions,     cycle_num)
+    # Phase 4 — behavior / C2
+    run_check("Beaconing",               check_beaconing,              cycle_num)
+    run_check("ARP / Gateway",           check_arp_spoofing,           cycle_num)
+    run_check("Process Lineage",         check_process_lineage,        cycle_num)
+    run_check("Ransomware IOC",          check_ransomware_indicators,  cycle_num)
+    run_check("Webcam / Mic",            check_webcam_mic,             cycle_num)
 
     print(f"\n  {DIM}Saving to Excel...{RESET}", end="\r")
     append_to_excel(all_tech, all_exec)
     print(f"  {GREEN}✔ Excel updated — {g_excel_path}{RESET}")
-    return all_tech, all_exec
+    return all_tech, all_exec, check_status
 
 
 # ─── BASELINE ─────────────────────────────────────────────────────────────────
@@ -2374,13 +3529,14 @@ def monitoring_loop():
                 print(f"\n  {YELLOW}⏱ Protection period complete.{RESET}")
                 break
 
-            run_full_cycle(cycle_num)
+            _all_tech, _all_exec, _check_status = run_full_cycle(cycle_num)
             cycle_num += 1
 
             if duration_end and time.time() >= duration_end:
                 break
 
-            show_live_traffic_and_countdown(CYCLE_INTERVAL, cycle_num-1, duration_end)
+            show_live_traffic_and_countdown(CYCLE_INTERVAL, cycle_num-1, duration_end,
+                                            _all_tech, _check_status)
 
     except KeyboardInterrupt:
         pass
