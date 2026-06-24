@@ -1,0 +1,58 @@
+Set-ExecutionPolicy Bypass -Scope Process -Force
+Write-Host ""
+Write-Host " _____ _____  _______ ____   ____  _     " -ForegroundColor Cyan
+Write-Host "|_   _|_   _||__   __/ __ \ / __ \| |    " -ForegroundColor Cyan
+Write-Host "  | |   | |     | | | |  | | |  | | |    " -ForegroundColor Cyan
+Write-Host "  | |   | |     | | | |  | | |  | | |    " -ForegroundColor Cyan
+Write-Host " _| |_  | |     | | | |__| | |__| | |___ " -ForegroundColor Cyan
+Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  ==================================================================" -ForegroundColor White
+Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
+Write-Host "  Script: 296_DDU_Display_Driver_Unistaller.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0296" -ForegroundColor Cyan
+Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
+Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
+Write-Host "  Category: Windows > App Downloader" -ForegroundColor DarkCyan
+Write-Host "  Description: Downloads DDU (Display Driver Uninstaller) ZIP from GitHub, extracts it to the Desktop, and cleans up the temp file" -ForegroundColor DarkCyan
+Write-Host "  (c) 2025 SalgadoTech - All Rights Reserved" -ForegroundColor DarkCyan
+Write-Host "  Unauthorized distribution prohibited" -ForegroundColor DarkCyan
+Write-Host "  ==================================================================" -ForegroundColor White
+Write-Host ""
+$url     = "https://github.com/IT-Tool-by-SalgadoTech/ittool-External_Tools/raw/refs/heads/main/DDU%20v18.1.5.3.zip"
+$zipName = "DDU_v18.1.5.3.zip"
+$zipPath = Join-Path $env:TEMP $zipName
+$dest    = [Environment]::GetFolderPath("Desktop")
+
+Write-Host "  [1/3] Downloading $zipName to TEMP..." -ForegroundColor Cyan
+
+try {
+    Invoke-WebRequest -Uri $url -OutFile $zipPath -UseBasicParsing
+    Write-Host "  SUCCESS: Download complete." -ForegroundColor Green
+} catch {
+    Write-Host "  ERROR: Download failed - $_" -ForegroundColor Red
+    Write-Host ""
+    Read-Host "Press Enter to exit..."
+    exit 1
+}
+
+Write-Host ""
+Write-Host "  [2/3] Extracting to Desktop..." -ForegroundColor Cyan
+
+try {
+    Expand-Archive -Path $zipPath -DestinationPath $dest -Force
+    Write-Host "  SUCCESS: Extracted to $dest" -ForegroundColor Green
+} catch {
+    Write-Host "  ERROR: Extraction failed - $_" -ForegroundColor Red
+    Write-Host ""
+    Read-Host "Press Enter to exit..."
+    exit 1
+}
+
+Write-Host ""
+Write-Host "  [3/3] Cleaning up temp ZIP..." -ForegroundColor Cyan
+Remove-Item $zipPath -Force
+Write-Host "  SUCCESS: Cleanup complete." -ForegroundColor Green
+
+Write-Host ""
+Read-Host "Press Enter to exit..."
