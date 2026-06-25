@@ -9,40 +9,84 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 287_Python_remove.ps1" -ForegroundColor DarkCyan
+Write-Host "  Script: 287.Python_remove.ps1" -ForegroundColor DarkCyan
 Write-Host "  ScriptID: ST-WIN-0287" -ForegroundColor Cyan
-Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
-Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
-Write-Host "  Category: Windows > App Downloader" -ForegroundColor DarkCyan
-Write-Host "  Description: Downloads the Python_remove script from GitHub to the Desktop and executes it" -ForegroundColor DarkCyan
+Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
+Write-Host "  Date: 2026-06-17" -ForegroundColor DarkCyan
+Write-Host "  Category: Windows > Software" -ForegroundColor DarkCyan
+Write-Host "  Description: Completely removes Python: uninstalls all versions, disables aliases, cleans PATH and removes residual folders." -ForegroundColor DarkCyan
 Write-Host "  (c) 2025 SalgadoTech - All Rights Reserved" -ForegroundColor DarkCyan
 Write-Host "  Unauthorized distribution prohibited" -ForegroundColor DarkCyan
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host ""
-$dst = "$env:USERPROFILE\Desktop\Python_remove.ps1"
-$raw = "https://github.com/IT-Tool-by-SalgadoTech/ittool-External_Tools/raw/refs/heads/main/280.Python_remove.ps1"
+# Requires: Run as Administrator
+# Remove-Python-Completely.ps1
 
-$destDir = Split-Path $dst
-if (-not (Test-Path $destDir)) {
-    New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "SilentlyContinue"
+
+Write-Host "`n=== PYTHON COMPLETE REMOVAL START ===`n"
+
+# 1️⃣ Desinstalar todas las versiones detectadas por winget
+Write-Host "Checking installed Python versions..."
+$pyPackages = winget list --source winget | Select-String -Pattern "Python"
+
+foreach ($pkg in $pyPackages) {
+    if ($pkg -match "Python\.Python") {
+        $id = ($pkg -split "\s+")[1]
+        Write-Host "Uninstalling $id ..."
+        winget uninstall --id $id --silent --accept-source-agreements --accept-package-agreements
+    }
 }
 
-Write-Host "  Downloading Python_remove script from GitHub..." -ForegroundColor Cyan
+# 2️⃣ Desactivar App Execution Aliases
+Write-Host "Disabling Python App Execution Aliases..."
+$aliasesPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\App Paths"
+Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\App Execution Aliases" -Name "python.exe" -ErrorAction SilentlyContinue
+Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\App Execution Aliases" -Name "python3.exe" -ErrorAction SilentlyContinue
 
-try {
-    curl.exe -L $raw -o $dst
-    if (-not (Test-Path $dst)) { throw "File not found after download." }
-    Write-Host "  SUCCESS: Script downloaded to $dst" -ForegroundColor Green
-} catch {
-    Write-Host "  ERROR: Download failed - $_" -ForegroundColor Red
-    Write-Host ""
-    Read-Host "Press Enter to exit..."
-    exit 1
+# 3️⃣ Limpiar PATH (Usuario y Sistema)
+Write-Host "Cleaning PATH variables..."
+
+function Remove-PythonFromPath {
+    param ($Scope)
+
+    $envKey = if ($Scope -eq "User") {
+        "HKCU:\Environment"
+    } else {
+        "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+    }
+
+    $currentPath = (Get-ItemProperty -Path $envKey -Name Path).Path
+    $newPath = ($currentPath -split ";" | Where-Object {$_ -notmatch "Python"}) -join ";"
+
+    Set-ItemProperty -Path $envKey -Name Path -Value $newPath
 }
 
-Write-Host ""
-Write-Host "  Running Python_remove script..." -ForegroundColor Cyan
-& "$dst"
+Remove-PythonFromPath -Scope "User"
+Remove-PythonFromPath -Scope "System"
 
-Write-Host ""
-Read-Host "Press Enter to exit..."
+# 4️⃣ Eliminar carpetas residuales comunes
+Write-Host "Removing residual folders..."
+
+$pathsToRemove = @(
+    "$env:LOCALAPPDATA\Programs\Python",
+    "$env:APPDATA\Python",
+    "C:\Python*"
+)
+
+foreach ($path in $pathsToRemove) {
+    Get-ChildItem $path -Directory -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
+}
+
+# 5️⃣ Verificación final
+Write-Host "`nVerifying removal..."
+$check = Get-Command python -ErrorAction SilentlyContinue
+
+if ($check) {
+    Write-Host "Python still detected in system PATH."
+} else {
+    Write-Host "Python completely removed from system."
+}
+
+Write-Host "`n=== DONE ==="

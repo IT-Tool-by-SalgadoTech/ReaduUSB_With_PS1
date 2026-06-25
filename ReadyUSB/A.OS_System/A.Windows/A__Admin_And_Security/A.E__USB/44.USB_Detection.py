@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# ============================================================================
+#  IT-Tool by SalgadoTech
+#  Script: 44.USB_Detection.py
+#  ScriptID: ST-WIN-0044-PY
+#  Version: 1.0
+#  Date: 2025-05-27
+#  Category: Windows / Linux > Hardware
+#  Description: USB device monitor - detects COM ports, MAC, VID/PID and
+#               metadata. Real-time connect/disconnect, refresh every 2s.
+#  (c) 2025 SalgadoTech - All Rights Reserved
+#  Unauthorized distribution prohibited
+#  Encoding: UTF-8 (no BOM)
+# ============================================================================
 """
 USB Device Monitor
 ==================
@@ -299,17 +313,24 @@ def clear_screen():
 
 def print_header(started_at: str):
     clear_screen()
-    W = "\033[97m"   # bright white
-    C = "\033[96m"   # cyan
-    G = "\033[92m"   # green
-    B = "\033[1m"    # bold
-    R = "\033[0m"    # reset
-    line = "=" * 72
-    print(f"{C}{line}{R}")
-    print(f"{B}{C}  USB DEVICE MONITOR{R}   OS: {OS}   Refresh: every {POLL_INTERVAL}s")
-    print(f"  Started : {started_at}")
-    print(f"  Now     : {timestamp()}")
-    print(f"{C}{line}{R}")
+    C  = "\033[96m"   # cyan
+    W  = "\033[97m"   # bright white
+    GR = "\033[90m"   # gray
+    R  = "\033[0m"    # reset
+    bar = "=" * 64
+    print("")
+    print(f"{C} _____ _____  _______ ____   ____  _     {R}")
+    print(f"{C}|_   _|_   _||__   __/ __ \\ / __ \\| |    {R}")
+    print(f"{C}  | |   | |     | | | |  | | |  | | |    {R}")
+    print(f"{C}  | |   | |     | | | |  | | |  | | |    {R}")
+    print(f"{C} _| |_  | |     | | | |__| | |__| | |___ {R}")
+    print(f"{C}|_____| |_|     |_|  \\____/ \\____/|_____|{R}")
+    print("")
+    print(f"{W}  {bar}{R}")
+    print(f"{C}  IT-Tool by SalgadoTech{R}")
+    print(f"{GR}  Script: 44.USB_Detection.py  |  ScriptID: ST-WIN-0044-PY  |  v1.0{R}")
+    print(f"{GR}  Live USB Monitor — Refresh every 2s, Ctrl+C to exit{R}")
+    print(f"{W}  {bar}{R}")
 
 
 # ── Main monitor loop ──────────────────────────────────────────────────────────

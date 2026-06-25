@@ -265,7 +265,7 @@ Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
 Write-Host "  Script: Delete_WSL.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: (pending)" -ForegroundColor Cyan
+Write-Host "  ScriptID: ST-WIN-0056" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-16" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > WSL" -ForegroundColor DarkCyan

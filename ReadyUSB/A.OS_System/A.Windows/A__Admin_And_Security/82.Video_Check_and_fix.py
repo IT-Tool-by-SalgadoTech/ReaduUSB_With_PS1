@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# ==============================================================================
-#  Video_Check_and_fix.py
-#  SalgadoTech - GPU / Display Output Diagnostic & Recovery Tool
-# ------------------------------------------------------------------------------
-#  Detects the installed GPU(s) and the connection technology of every display
-#  output (HDMI, DisplayPort, DVI, VGA, Internal panel, Miracast / Wireless...),
-#  then offers vendor-aware recovery actions:
-#     - Open the GPU control panel (auto by vendor)
-#     - Restore / reset display settings (guided + advanced scriptable resets)
-#     - Force display re-detect (graphics driver restart)
-#     - Switch projection mode (the Win+P "Second screen" modes)
-#
-#  Windows only. Python 3.8+. No third-party dependencies (uses PowerShell/CIM).
-# ==============================================================================
+# ============================================================================
+#  IT-Tool by SalgadoTech
+#  Script: 82.Video_Check_and_fix.py
+#  ScriptID: ST-WIN-0082-PY
+#  Version: 1.0
+#  Date: 2025-05-27
+#  Category: Windows > Display / GPU
+#  Description: GPU and display output diagnostic and recovery tool. Detects
+#               GPUs, connection types and offers vendor-aware recovery actions.
+#  (c) 2025 SalgadoTech - All Rights Reserved
+#  Unauthorized distribution prohibited
+#  Encoding: UTF-8 (no BOM)
+# ============================================================================
 
 import os
 import sys
@@ -61,25 +60,21 @@ def enable_ansi():
 # ------------------------------------------------------------------------------
 #  Banner
 # ------------------------------------------------------------------------------
-BANNER = r"""
-+==============================================================================+
-|                                                                              |
-|      ____        _                 _    _____         _                      |
-|     / ___|  __ _| | __ _  __ _  __| | _|_   _|__  ___| |__                   |
-|     \___ \ / _` | |/ _` |/ _` |/ _` |/ _ \| |/ _ \/ __| '_ \                 |
-|      ___) | (_| | | (_| | (_| | (_| | (_) | |  __/ (__| | | |                |
-|     |____/ \__,_|_|\__, |\__,_|\__,_|\___/|_|\___|\___|_| |_|                |
-|                    |___/                                                     |
-|                                                                              |
-|                  V I D E O   C H E C K   &   F I X                           |
-|              GPU / Display Output Diagnostic & Recovery Tool                 |
-|                                                                              |
-+==============================================================================+
-"""
-
-
 def print_banner():
-    print(C.CYAN + BANNER + C.RESET)
+    bar = "=" * 64
+    print("")
+    print(C.CYAN + " _____ _____  _______ ____   ____  _     " + C.RESET)
+    print(C.CYAN + "|_   _|_   _||__   __/ __ \\ / __ \\| |    " + C.RESET)
+    print(C.CYAN + "  | |   | |     | | | |  | | |  | | |    " + C.RESET)
+    print(C.CYAN + "  | |   | |     | | | |  | | |  | | |    " + C.RESET)
+    print(C.CYAN + " _| |_  | |     | | | |__| | |__| | |___ " + C.RESET)
+    print(C.CYAN + "|_____| |_|     |_|  \\____/ \\____/|_____|" + C.RESET)
+    print("")
+    print(C.WHITE + "  " + bar + C.RESET)
+    print(C.CYAN + "  IT-Tool by SalgadoTech" + C.RESET)
+    print(C.GRAY + "  Script: 82.Video_Check_and_fix.py  |  ScriptID: ST-WIN-0082-PY  |  v1.0" + C.RESET)
+    print(C.GRAY + "  GPU / Display Diagnostic & Recovery Tool" + C.RESET)
+    print(C.WHITE + "  " + bar + C.RESET)
 
 
 # ------------------------------------------------------------------------------
@@ -786,7 +781,7 @@ def main_menu():
             warn("Invalid option.")
             time.sleep(1)
 
-    print(C.CYAN + "\nSalgadoTech - Video Check & Fix. Goodbye.\n" + C.RESET)
+    print(C.CYAN + "\nIT-Tool by SalgadoTech - Video Check & Fix. Goodbye.\n" + C.RESET)
 
 
 def main():
