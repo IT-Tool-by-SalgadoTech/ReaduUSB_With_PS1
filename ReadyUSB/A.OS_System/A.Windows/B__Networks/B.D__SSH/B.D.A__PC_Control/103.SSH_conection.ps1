@@ -8,24 +8,14 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: UAC_Off.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0000" -ForegroundColor Cyan
+Write-Host "  Script: SSH_conection.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0103" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-24" -ForegroundColor DarkCyan
-Write-Host "  Category: Windows > Security" -ForegroundColor DarkCyan
-Write-Host "  Description: Disable Windows UAC and restarts the system" -ForegroundColor DarkCyan
+Write-Host "  Category: Windows > Remote Access" -ForegroundColor DarkCyan
+Write-Host "  Description: Opens an interactive SSH connection to a user-specified host" -ForegroundColor DarkCyan
 Write-Host "  (c) 2025 SalgadoTech - All Rights Reserved" -ForegroundColor DarkCyan
 Write-Host "  Unauthorized distribution prohibited" -ForegroundColor DarkCyan
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host ""
-$id = [Security.Principal.WindowsIdentity]::GetCurrent()
-$principal = New-Object Security.Principal.WindowsPrincipal($id)
-if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process powershell.exe -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
-    exit
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value 0
-Write-Host "  UAC has been disable (DisableLUA = 0)." -ForegroundColor Green
-Write-Host "  The system will restart in 3 seconds..." -ForegroundColor Yellow
-Start-Sleep -Seconds 3
-shutdown /r /t 1
+ssh ("{0}@{1}" -f (Read-Host "Enter the SSH username"), (Read-Host "Enter the IP address or hostname"))

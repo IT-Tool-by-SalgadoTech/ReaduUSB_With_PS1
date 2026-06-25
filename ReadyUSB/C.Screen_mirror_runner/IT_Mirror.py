@@ -3,7 +3,7 @@
 # ============================================================================
 #  IT-Tool by SalgadoTech
 #  Script: IT_Mirror.py
-#  ScriptID: ST-WIN-XXXX-PY
+#  ScriptID: ST-WIN-0000-PY
 #  Version: 5.0
 #  Date: 2026-06-17
 #  Category: Windows / Linux > Companion Tools
