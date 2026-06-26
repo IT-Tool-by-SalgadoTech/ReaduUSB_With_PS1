@@ -32,4 +32,4 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "[X] Something went wrong. Check the output above." -ForegroundColor Red
 }
 
-Read-Host "Presiona Enter para salir..."
+Read-Host "Press Enter to exit..."

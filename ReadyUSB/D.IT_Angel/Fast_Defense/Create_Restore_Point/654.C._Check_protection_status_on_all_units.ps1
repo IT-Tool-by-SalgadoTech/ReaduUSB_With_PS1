@@ -21,4 +21,4 @@ Write-Host "  ==================================================================
 Write-Host ""
 
 Get-ComputerRestorePoint
-Read-Host "Presiona Enter para salir..."
+Read-Host "Press Enter to exit..."

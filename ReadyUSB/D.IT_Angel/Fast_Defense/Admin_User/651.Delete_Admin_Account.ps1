@@ -30,4 +30,4 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "[X] Failed to delete user '$user'. Check the output above." -ForegroundColor Red
 }
 
-Read-Host "Presiona Enter para salir..."
+Read-Host "Press Enter to exit..."

@@ -21,4 +21,4 @@ Write-Host "  ==================================================================
 Write-Host ""
 
 Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore" -Name "SystemRestorePointCreationFrequency"
-Read-Host "Presiona Enter para salir..."
+Read-Host "Press Enter to exit..."

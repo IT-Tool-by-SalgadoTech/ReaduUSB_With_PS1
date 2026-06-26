@@ -20,21 +20,21 @@ Write-Host "  Unauthorized distribution prohibited" -ForegroundColor DarkCyan
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host ""
 
-# ── Verificar privilegios de administrador ────────────────────────────────────
+# ── Admin check ────────────────────────────────────
 $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal   = [Security.Principal.WindowsPrincipal]$currentUser
 $isAdmin     = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if (-not $isAdmin) {
-    Write-Host "  ERROR: Este script requiere privilegios de administrador." -ForegroundColor Red
-    Write-Host "  Cierra esta ventana, haz clic derecho en el script y selecciona" -ForegroundColor Yellow
-    Write-Host "  'Ejecutar con PowerShell como administrador'." -ForegroundColor Yellow
+    Write-Host "  ERROR: This script requires administrator privileges." -ForegroundColor Red
+    Write-Host "  Close this window, right-click the script and select" -ForegroundColor Yellow
+    Write-Host "  'Run with PowerShell as administrator'." -ForegroundColor Yellow
     Write-Host ""
-    Read-Host "Presiona Enter para salir..."
+    Read-Host "Press Enter to exit..."
     exit 1
 }
 
-# ── Habilitar proteccion del sistema en C:\ ───────────────────────────────────
+# ── Enable system protection on C:\ ───────────────────────────────────
 Write-Host "  Enabling System Protection on C:\..." -ForegroundColor Cyan
 Enable-ComputerRestore -Drive "C:\"
 Write-Host "Protection system successfully enabled.." -ForegroundColor Green

@@ -21,4 +21,4 @@ Write-Host "  ==================================================================
 Write-Host ""
 
 $user = Read-Host "Enter user"; net user "$user" *
-Read-Host "Presiona Enter para salir..."
+Read-Host "Press Enter to exit..."
