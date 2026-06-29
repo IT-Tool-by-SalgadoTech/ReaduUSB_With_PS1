@@ -1,3 +1,4 @@
+Set-ExecutionPolicy Bypass -Scope Process -Force
 Write-Host ""
 Write-Host " _____ _____  _______ ____   ____  _     " -ForegroundColor Cyan
 Write-Host "|_   _|_   _||__   __/ __ \ / __ \| |    " -ForegroundColor Cyan
@@ -8,18 +9,23 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: UAC_On.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0690" -ForegroundColor Cyan
-Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
-Write-Host "  Date: 2026-06-24" -ForegroundColor DarkCyan
-Write-Host "  Category: Windows > Security" -ForegroundColor DarkCyan
-Write-Host "  Description: Re-enables Windows UAC (EnableLUA = 1) and restarts the system" -ForegroundColor DarkCyan
+Write-Host "  Script: 205.User_folder.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0205" -ForegroundColor Cyan
+Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
+Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
+Write-Host "  Category: Windows > Files & Folders" -ForegroundColor DarkCyan
+Write-Host "  Description: Opens the current user's profile folder in Windows Explorer" -ForegroundColor DarkCyan
 Write-Host "  (c) 2025 SalgadoTech - All Rights Reserved" -ForegroundColor DarkCyan
 Write-Host "  Unauthorized distribution prohibited" -ForegroundColor DarkCyan
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host ""
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value 1
-Write-Host "  UAC has been enabled (EnableLUA = 1)." -ForegroundColor Green
-Write-Host "  The system will restart in 3 seconds..." -ForegroundColor Yellow
-Start-Sleep -Seconds 3
-shutdown /r /t 1
+
+try {
+    Start-Process explorer.exe $env:USERPROFILE
+    Write-Host "  SUCCESS: Opened user profile folder: '$env:USERPROFILE'" -ForegroundColor Green
+} catch {
+    Write-Host "  ERROR: Failed to open user profile folder. $_" -ForegroundColor Red
+}
+
+Write-Host ""
+Read-Host "Press Enter to exit..."
