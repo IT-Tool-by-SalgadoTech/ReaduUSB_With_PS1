@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 719.Unblock_Device_By_MAC.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0719" -ForegroundColor Cyan
+Write-Host "  Script: 692.Unblock_Device_By_MAC.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0692" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-26" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Networks" -ForegroundColor DarkCyan

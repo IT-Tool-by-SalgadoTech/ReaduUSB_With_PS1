@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 688.Show_Active_Blocks.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0688" -ForegroundColor Cyan
+Write-Host "  Script: 687.Show_Active_Blocks.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0687" -ForegroundColor Cyan
 Write-Host "  Version: 1.2" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-26" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Networks" -ForegroundColor DarkCyan

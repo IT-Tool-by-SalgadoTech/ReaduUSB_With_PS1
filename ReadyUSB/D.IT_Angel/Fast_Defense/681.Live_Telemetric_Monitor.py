@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # ============================================================================
 #  IT-Tool by SalgadoTech
-#  Script: 695.Live_Telemetry_Monitor.py
-#  ScriptID: ST-WIN-0695-PY
+#  Script: 681.Live_Telemetry_Monitor.py
+#  ScriptID: ST-WIN-0681-PY
 #  Version: 1.0
 #  Date: 2026-06-26
 #  Category: Windows / Linux > Networks
@@ -200,7 +200,7 @@ HEADER = (
     f"\n"
     f"{WHITE}  {'=' * 78}{RESET}\n"
     f"{CYAN}  IT-Tool by SalgadoTech{RESET}\n"
-    f"{GRAY}  Script: 695.Live_Telemetry_Monitor.py  |  ScriptID: ST-WIN-0695-PY  |  v1.0{RESET}\n"
+    f"{GRAY}  Script: 681.Live_Telemetry_Monitor.py  |  ScriptID: ST-WIN-0681-PY  |  v1.0{RESET}\n"
     f"{GRAY}  Live Outbound Telemetry  -  who is sending, to whom, and where  -  [Q] Quit{RESET}\n"
     f"{WHITE}  {'=' * 78}{RESET}\n"
 )

@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 714.Block_Suspicious_IP.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0714" -ForegroundColor Cyan
+Write-Host "  Script: 670.Block_Suspicious_IP.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0670" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-26" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Networks" -ForegroundColor DarkCyan
