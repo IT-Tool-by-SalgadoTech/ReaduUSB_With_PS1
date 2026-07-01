@@ -1,4 +1,0 @@
-REM Show failed SSH/login attempts
-DELAY 500
-STRING sudo grep -i "failed\|invalid\|error" /var/log/auth.log 2>/dev/null | tail -30 || sudo journalctl -u sshd --no-pager | grep -i "failed\|invalid" | tail -30
-ENTER

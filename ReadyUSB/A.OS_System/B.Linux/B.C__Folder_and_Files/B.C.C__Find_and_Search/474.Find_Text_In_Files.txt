@@ -1,4 +1,0 @@
-REM Search for text inside files (grep recursive)
-DELAY 500
-STRING read -p "Text to search: " txt; read -p "Directory (Enter for current): " d; grep -rn "$txt" "${d:-.}" 2>/dev/null
-ENTER

@@ -1,4 +1,0 @@
-REM Install the full Kali Linux tools meta-package (large download)
-DELAY 500
-STRING read -p "Type INSTALL to confirm installing kali-linux-everything (~15GB): " c; [ "$c" = "INSTALL" ] && sudo apt install -y kali-linux-everything || echo "Aborted."
-ENTER

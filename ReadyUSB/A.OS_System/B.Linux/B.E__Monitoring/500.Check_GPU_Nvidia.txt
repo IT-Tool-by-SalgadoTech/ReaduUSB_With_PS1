@@ -1,4 +1,0 @@
-REM Show Nvidia GPU status and usage
-DELAY 500
-STRING nvidia-smi 2>/dev/null || echo "nvidia-smi not found. NVIDIA drivers may not be installed."
-ENTER

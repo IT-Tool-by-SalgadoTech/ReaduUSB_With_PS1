@@ -1,4 +1,0 @@
-REM Allow all traffic from a specific IP (iptables)
-DELAY 500
-STRING read -p "IP to allow: " ip; sudo iptables -A INPUT -s "$ip" -j ACCEPT && echo "IP $ip allowed in INPUT."
-ENTER

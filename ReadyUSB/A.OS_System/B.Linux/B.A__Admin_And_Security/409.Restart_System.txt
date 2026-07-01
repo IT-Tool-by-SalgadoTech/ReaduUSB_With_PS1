@@ -1,4 +1,0 @@
-REM Restart the system now
-DELAY 500
-STRING read -p "Type RESTART to confirm: " c; [ "$c" = "RESTART" ] && sudo reboot || echo "Aborted."
-ENTER

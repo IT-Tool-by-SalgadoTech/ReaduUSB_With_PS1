@@ -1,4 +1,0 @@
-REM Crack a hash using hashcat with a wordlist (mode 0 = straight)
-DELAY 500
-STRING read -p "Hash type number (e.g. 0=MD5 1000=NTLM 1800=sha512crypt): " mode; read -p "Hash or hash file path: " hash; read -p "Wordlist (Enter for rockyou): " w; w="${w:-/usr/share/wordlists/rockyou.txt}"; hashcat -m "$mode" "$hash" "$w" --force
-ENTER

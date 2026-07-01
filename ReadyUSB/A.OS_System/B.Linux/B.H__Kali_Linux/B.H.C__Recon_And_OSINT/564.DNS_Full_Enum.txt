@@ -1,4 +1,0 @@
-REM Full DNS enumeration: A, MX, NS, TXT, CNAME records
-DELAY 500
-STRING read -p "Domain to enumerate: " d; for type in A AAAA MX NS TXT CNAME SOA; do echo "=== $type ==="; dig "$d" "$type" +short 2>/dev/null; done
-ENTER

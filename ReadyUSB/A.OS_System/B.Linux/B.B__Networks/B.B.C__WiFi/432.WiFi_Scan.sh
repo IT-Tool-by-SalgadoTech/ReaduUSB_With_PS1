@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================
 # IT-Tool by SalgadoTech
-# Script: ST-LIN-0322_Check_Groups.sh
-# ScriptID: ST-LIN-0322
+# Script: 432.WiFi_Scan.sh
+# ScriptID: ST-LIN-0432
 # Version: 1.0
-# Date: 2026-06-02
-# Category: Linux > Admin And Security > User Management
-# Description: Displays all system groups, GIDs, and members.
-# (c) 2026 SalgadoTech - All Rights Reserved
+# Date: 2026-07-01
+# Category: Linux > Networks > WiFi
+# Description: Scans for available WiFi networks using nmcli.
+# (c) 2025 SalgadoTech - All Rights Reserved
 # Unauthorized distribution prohibited
 # ==============================================================
 
@@ -27,35 +27,27 @@ echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
 echo -e '\033[0;36m\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
-echo -e '\033[0;36m  Script: ST-LIN-0322_Check_Groups.sh\033[0m'
-echo -e '\033[0;36m  ScriptID: ST-LIN-0322\033[0m'
+echo -e '\033[0;36m  Script: 432.WiFi_Scan.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0432\033[0m'
 echo -e '\033[0;36m  Version: 1.0\033[0m'
-echo -e '\033[0;36m  Date: 2026-06-02\033[0m'
-echo -e '\033[0;36m  Category: Linux > Admin And Security > User Management\033[0m'
-echo -e '\033[0;36m  Description: Displays all system groups, GIDs, and members\033[0m'
-echo -e '\033[0;36m  (c) 2026 SalgadoTech - All Rights Reserved\033[0m'
+echo -e '\033[0;36m  Date: 2026-07-01\033[0m'
+echo -e '\033[0;36m  Category: Linux > Networks > WiFi\033[0m'
+echo -e '\033[0;36m  Description: Scans for available WiFi networks\033[0m'
+echo -e '\033[0;36m  (c) 2025 SalgadoTech - All Rights Reserved\033[0m'
 echo -e '\033[0;36m  Unauthorized distribution prohibited\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo ""
 
-echo -e "${YELLOW}  Listing all system groups (name : GID : members)...${NC}"
-echo ""
-
-if ! getent group >/dev/null 2>&1; then
-    echo -e "${RED}  ERROR: Unable to read the group database.${NC}"
+if ! command -v nmcli &>/dev/null; then
+    echo -e "${RED}  ERROR: nmcli (NetworkManager) is not installed.${NC}"
     echo ""
     read -rp "Press Enter to exit..." _
     exit 1
 fi
 
-printf "  %-24s %-8s %s\n" "GROUP" "GID" "MEMBERS"
-printf "  %-24s %-8s %s\n" "------------------------" "--------" "-------"
-
-getent group | sort -t: -k3 -n | while IFS=: read -r name _ gid members; do
-    printf "  %-24s %-8s %s\n" "$name" "$gid" "$members"
-done
-
+echo -e "${YELLOW}  Scanning for available WiFi networks...${NC}"
 echo ""
-echo -e "${GREEN}  SUCCESS: Group list displayed.${NC}"
+nmcli dev wifi list
+
 echo ""
 read -rp "Press Enter to exit..." _

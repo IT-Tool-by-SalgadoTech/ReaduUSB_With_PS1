@@ -1,4 +1,0 @@
-REM Check and repair filesystem on an UNMOUNTED partition
-DELAY 500
-STRING lsblk; read -p "Unmounted partition to check (e.g. sdb1): " d; sudo fsck -y /dev/"$d"
-ENTER

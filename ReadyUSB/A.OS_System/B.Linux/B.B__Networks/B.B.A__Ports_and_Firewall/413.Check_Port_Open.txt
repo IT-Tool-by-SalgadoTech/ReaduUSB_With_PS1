@@ -1,4 +1,0 @@
-REM Check if a specific port is open on a remote host
-DELAY 500
-STRING read -p "Remote host (IP or domain): " h; read -p "Port: " p; nc -zv "$h" "$p" 2>&1 && echo "Port $p is OPEN on $h" || echo "Port $p is CLOSED or filtered on $h"
-ENTER

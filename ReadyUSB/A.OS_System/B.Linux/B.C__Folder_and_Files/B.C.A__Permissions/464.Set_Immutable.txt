@@ -1,4 +1,0 @@
-REM Set a file as immutable (cannot be modified or deleted even by root)
-DELAY 500
-STRING read -p "File path: " f; sudo chattr +i "$f" && echo "$f set as immutable."
-ENTER

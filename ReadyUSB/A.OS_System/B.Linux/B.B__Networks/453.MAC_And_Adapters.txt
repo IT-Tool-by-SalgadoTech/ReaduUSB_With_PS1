@@ -1,4 +1,0 @@
-REM Show network interfaces with MAC addresses
-DELAY 500
-STRING ip link show | grep -E "^[0-9]+:|link/ether"
-ENTER

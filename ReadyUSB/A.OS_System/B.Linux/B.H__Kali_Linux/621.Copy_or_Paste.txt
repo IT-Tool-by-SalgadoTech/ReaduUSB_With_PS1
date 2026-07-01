@@ -1,5 +1,0 @@
-DELAY 1500
-CTRL ALT T
-DELAY 2000
-STRING printf "Copy (c) or Move (m): "; read -r c; printf "source_folder: "; read -r s; printf "destination_folder: "; read -r d; s=${~s}; d=${~d}; s=${s%/}; d=${d%/}; if [[ "$c" == "m" ]]; then mv -- "$s" "$d"/; elif [[ "$c" == "c" ]]; then cp -a -- "$s" "$d"/; else echo "Use c or m"; return 1; fi
-ENTER

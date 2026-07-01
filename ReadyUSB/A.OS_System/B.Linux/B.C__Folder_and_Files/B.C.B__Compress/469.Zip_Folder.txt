@@ -1,4 +1,0 @@
-REM Compress a folder into a .zip file
-DELAY 500
-STRING read -p "Folder to compress: " d; read -p "Output .zip name: " z; zip -r "${z}.zip" "$d" && echo "Created ${z}.zip"
-ENTER

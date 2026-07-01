@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================
 # IT-Tool by SalgadoTech
-# Script: ST-LIN-0322_Check_Groups.sh
-# ScriptID: ST-LIN-0322
+# Script: 534.Nmap_Ping_Sweep_LAN.sh
+# ScriptID: ST-LIN-0534
 # Version: 1.0
-# Date: 2026-06-02
-# Category: Linux > Admin And Security > User Management
-# Description: Displays all system groups, GIDs, and members.
-# (c) 2026 SalgadoTech - All Rights Reserved
+# Date: 2026-07-01
+# Category: Linux > Nmap
+# Description: Discovers all live hosts on a subnet using an Nmap ping sweep.
+# (c) 2025 SalgadoTech - All Rights Reserved
 # Unauthorized distribution prohibited
 # ==============================================================
 
@@ -27,35 +27,42 @@ echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
 echo -e '\033[0;36m\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
-echo -e '\033[0;36m  Script: ST-LIN-0322_Check_Groups.sh\033[0m'
-echo -e '\033[0;36m  ScriptID: ST-LIN-0322\033[0m'
+echo -e '\033[0;36m  Script: 534.Nmap_Ping_Sweep_LAN.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0534\033[0m'
 echo -e '\033[0;36m  Version: 1.0\033[0m'
-echo -e '\033[0;36m  Date: 2026-06-02\033[0m'
-echo -e '\033[0;36m  Category: Linux > Admin And Security > User Management\033[0m'
-echo -e '\033[0;36m  Description: Displays all system groups, GIDs, and members\033[0m'
-echo -e '\033[0;36m  (c) 2026 SalgadoTech - All Rights Reserved\033[0m'
+echo -e '\033[0;36m  Date: 2026-07-01\033[0m'
+echo -e '\033[0;36m  Category: Linux > Nmap\033[0m'
+echo -e '\033[0;36m  Description: Discovers all live hosts on a subnet using an Nmap ping sweep\033[0m'
+echo -e '\033[0;36m  (c) 2025 SalgadoTech - All Rights Reserved\033[0m'
 echo -e '\033[0;36m  Unauthorized distribution prohibited\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo ""
 
-echo -e "${YELLOW}  Listing all system groups (name : GID : members)...${NC}"
-echo ""
-
-if ! getent group >/dev/null 2>&1; then
-    echo -e "${RED}  ERROR: Unable to read the group database.${NC}"
+if ! command -v nmap &>/dev/null; then
+    echo -e "${RED}  ERROR: nmap is not installed. Run the Nmap Install script first.${NC}"
     echo ""
     read -rp "Press Enter to exit..." _
     exit 1
 fi
 
-printf "  %-24s %-8s %s\n" "GROUP" "GID" "MEMBERS"
-printf "  %-24s %-8s %s\n" "------------------------" "--------" "-------"
+read -rp "  Subnet (e.g. 192.168.1.0/24): " s
 
-getent group | sort -t: -k3 -n | while IFS=: read -r name _ gid members; do
-    printf "  %-24s %-8s %s\n" "$name" "$gid" "$members"
-done
+if [ -z "$s" ]; then
+    echo -e "${RED}  ERROR: Subnet cannot be empty.${NC}"
+    echo ""
+    read -rp "Press Enter to exit..." _
+    exit 1
+fi
 
 echo ""
-echo -e "${GREEN}  SUCCESS: Group list displayed.${NC}"
+echo -e "${YELLOW}  Sweeping subnet '$s' for live hosts...${NC}"
+nmap -sn "$s"
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}  SUCCESS: Ping sweep of '$s' completed.${NC}"
+else
+    echo -e "${RED}  ERROR: Ping sweep of '$s' failed.${NC}"
+fi
+
 echo ""
 read -rp "Press Enter to exit..." _

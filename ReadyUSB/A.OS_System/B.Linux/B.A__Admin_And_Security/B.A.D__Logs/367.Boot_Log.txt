@@ -1,4 +1,0 @@
-REM Show logs from the current boot session
-DELAY 500
-STRING sudo journalctl -b --no-pager | tail -80
-ENTER

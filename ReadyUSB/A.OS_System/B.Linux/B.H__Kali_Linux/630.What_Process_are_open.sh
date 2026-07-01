@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# ==============================================================
+# IT-Tool by SalgadoTech
+# Script: 630.What_Process_are_open.sh
+# ScriptID: ST-LIN-0630
+# Version: 1.0
+# Date: 2026-07-01
+# Category: Linux > Kali Linux
+# Description: Shows the top running processes sorted by CPU usage.
+# (c) 2025 SalgadoTech - All Rights Reserved
+# Unauthorized distribution prohibited
+# ==============================================================
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo ""
+echo -e '\033[0;36m\033[0m'
+echo -e '\033[0;36m  _____ _____  _______ ____   ____  _\033[0m'
+echo -e '\033[0;36m |_   _|_   _||__   __/ __ \ / __ \| |\033[0m'
+echo -e '\033[0;36m   | |   | |     | | | |  | | |  | | |\033[0m'
+echo -e '\033[0;36m   | |   | |     | | | |  | | |  | | |\033[0m'
+echo -e '\033[0;36m  _| |_  | |     | | | |__| | |__| | |___\033[0m'
+echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
+echo -e '\033[0;36m\033[0m'
+echo -e '\033[0;37m  ==================================================================\033[0m'
+echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
+echo -e '\033[0;36m  Script: 630.What_Process_are_open.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0630\033[0m'
+echo -e '\033[0;36m  Version: 1.0\033[0m'
+echo -e '\033[0;36m  Date: 2026-07-01\033[0m'
+echo -e '\033[0;36m  Category: Linux > Kali Linux\033[0m'
+echo -e '\033[0;36m  Description: Shows the top running processes sorted by CPU usage\033[0m'
+echo -e '\033[0;36m  (c) 2025 SalgadoTech - All Rights Reserved\033[0m'
+echo -e '\033[0;36m  Unauthorized distribution prohibited\033[0m'
+echo -e '\033[0;37m  ==================================================================\033[0m'
+echo ""
+
+echo -e "${YELLOW}  Top processes by CPU:${NC}"
+echo ""
+ps -e -o pid,user,%cpu,%mem,etimes,cmd --sort=-%cpu | head -n 16
+
+echo ""
+echo -e "${YELLOW}  Tip: live monitoring${NC}"
+echo "  Live by CPU:  top -o %CPU"
+echo "  Live by RAM:  top -o %MEM"
+
+echo ""
+read -rp "Press Enter to exit..." _

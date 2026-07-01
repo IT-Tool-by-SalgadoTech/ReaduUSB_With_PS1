@@ -1,4 +1,0 @@
-REM List services enabled to start on boot
-DELAY 500
-STRING systemctl list-unit-files --type=service --state=enabled
-ENTER

@@ -1,4 +1,0 @@
-REM Allow a TCP/UDP port through UFW
-DELAY 500
-STRING read -p "Port number: " p; read -p "Protocol (tcp/udp/both): " proto; if [ "$proto" = "both" ]; then sudo ufw allow "$p/tcp" && sudo ufw allow "$p/udp"; else sudo ufw allow "$p/$proto"; fi && echo "Port $p/$proto allowed."
-ENTER

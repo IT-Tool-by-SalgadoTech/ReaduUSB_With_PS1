@@ -1,4 +1,0 @@
-REM Check SMART health of a disk (requires smartmontools)
-DELAY 500
-STRING read -p "Disk device (e.g. sda): " d; sudo smartctl -H /dev/"$d" 2>/dev/null || echo "smartmontools not installed. Run: sudo apt install smartmontools"
-ENTER

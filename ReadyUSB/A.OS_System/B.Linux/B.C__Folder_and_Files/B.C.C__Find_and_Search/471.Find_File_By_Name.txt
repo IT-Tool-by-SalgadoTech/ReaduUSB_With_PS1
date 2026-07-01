@@ -1,4 +1,0 @@
-REM Find files by name in a directory
-DELAY 500
-STRING read -p "Search in directory (Enter for /): " d; read -p "Filename or pattern (e.g. *.log): " n; sudo find "${d:-/}" -name "$n" 2>/dev/null
-ENTER

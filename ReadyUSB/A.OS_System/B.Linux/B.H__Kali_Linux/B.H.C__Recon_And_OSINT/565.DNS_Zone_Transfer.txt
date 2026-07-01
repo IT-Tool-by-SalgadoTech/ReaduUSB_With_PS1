@@ -1,4 +1,0 @@
-REM Attempt DNS zone transfer (AXFR) — works if server is misconfigured
-DELAY 500
-STRING read -p "Domain: " d; read -p "DNS server (or Enter for auto): " ns; ns="${ns:-$(dig NS "$d" +short | head -1)}"; dig axfr "$d" @"$ns"
-ENTER

@@ -1,4 +1,0 @@
-REM Launch bash as root (no login shell)
-DELAY 500
-STRING sudo bash
-ENTER

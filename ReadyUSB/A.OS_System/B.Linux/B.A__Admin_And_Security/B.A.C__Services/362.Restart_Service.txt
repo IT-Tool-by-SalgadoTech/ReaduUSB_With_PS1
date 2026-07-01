@@ -1,4 +1,0 @@
-REM Restart a service
-DELAY 500
-STRING read -p "Service name: " s; sudo systemctl restart "$s" && echo "Service $s restarted."
-ENTER

@@ -1,4 +1,0 @@
-REM View crontab entries for all users (root required)
-DELAY 500
-STRING for u in $(cut -f1 -d: /etc/passwd); do echo "=== $u ==="; sudo crontab -u "$u" -l 2>/dev/null || echo "(none)"; echo; done
-ENTER

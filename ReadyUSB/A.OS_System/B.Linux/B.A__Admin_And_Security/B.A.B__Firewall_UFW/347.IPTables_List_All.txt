@@ -1,4 +1,0 @@
-REM List all iptables rules (INPUT OUTPUT FORWARD)
-DELAY 500
-STRING sudo iptables -L -n -v --line-numbers
-ENTER

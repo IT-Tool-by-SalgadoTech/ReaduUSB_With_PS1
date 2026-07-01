@@ -1,4 +1,0 @@
-REM Block all traffic from a specific IP
-DELAY 500
-STRING read -p "IP address to block: " ip; sudo ufw deny from "$ip" && echo "Blocked all from $ip"
-ENTER

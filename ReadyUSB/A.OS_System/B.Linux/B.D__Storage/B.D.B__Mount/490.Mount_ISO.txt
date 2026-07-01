@@ -1,4 +1,0 @@
-REM Mount an ISO image as a virtual drive
-DELAY 500
-STRING read -p "ISO file path: " iso; read -p "Mount point (e.g. /mnt/iso): " mp; sudo mkdir -p "$mp" && sudo mount -o loop "$iso" "$mp" && echo "ISO mounted at $mp"
-ENTER

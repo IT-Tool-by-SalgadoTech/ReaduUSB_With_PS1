@@ -1,4 +1,0 @@
-REM Detect service versions on open ports
-DELAY 500
-STRING read -p "Target IP or hostname: " t; nmap -sV -T4 "$t"
-ENTER

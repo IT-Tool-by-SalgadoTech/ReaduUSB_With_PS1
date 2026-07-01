@@ -1,4 +1,0 @@
-REM Force kill (SIGKILL) a frozen process by name
-DELAY 500
-STRING read -p "Process name to force kill: " p; sudo pkill -9 "$p" && echo "Force killed: $p" || echo "No process found: $p"
-ENTER

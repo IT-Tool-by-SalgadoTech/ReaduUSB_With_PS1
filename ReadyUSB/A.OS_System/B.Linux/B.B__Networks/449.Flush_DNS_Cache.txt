@@ -1,4 +1,0 @@
-REM Flush DNS cache (systemd-resolved)
-DELAY 500
-STRING sudo systemd-resolve --flush-caches && echo "DNS cache flushed." || sudo service nscd restart 2>/dev/null
-ENTER

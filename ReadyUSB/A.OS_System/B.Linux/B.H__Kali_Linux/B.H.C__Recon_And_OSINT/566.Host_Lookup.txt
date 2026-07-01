@@ -1,4 +1,0 @@
-REM Reverse DNS lookup and host info
-DELAY 500
-STRING read -p "IP or domain: " t; host "$t"
-ENTER

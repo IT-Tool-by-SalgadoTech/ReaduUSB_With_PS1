@@ -1,4 +1,0 @@
-REM Connect to a WPA2 network using wpa_supplicant (no NetworkManager)
-DELAY 500
-STRING read -p "Interface (e.g. wlan0): " i; read -p "SSID: " s; read -p "Password: " p; printf 'network={\n  ssid="%s"\n  psk="%s"\n  key_mgmt=WPA-PSK\n}\n' "$s" "$p" | sudo tee /etc/wpa_supplicant/wpa_kali.conf > /dev/null; sudo wpa_supplicant -B -i "$i" -c /etc/wpa_supplicant/wpa_kali.conf && sudo dhclient "$i" && echo "Connected to $s"
-ENTER

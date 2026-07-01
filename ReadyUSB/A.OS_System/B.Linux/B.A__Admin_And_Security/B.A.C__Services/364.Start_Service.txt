@@ -1,4 +1,0 @@
-REM Start a service
-DELAY 500
-STRING read -p "Service name: " s; sudo systemctl start "$s" && echo "Service $s started."
-ENTER

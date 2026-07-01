@@ -1,4 +1,0 @@
-REM Show CPU and hardware temperatures
-DELAY 500
-STRING sensors 2>/dev/null || echo "lm-sensors not installed. Run: sudo apt install lm-sensors && sudo sensors-detect"
-ENTER

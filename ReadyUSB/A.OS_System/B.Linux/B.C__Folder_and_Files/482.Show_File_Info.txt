@@ -1,4 +1,0 @@
-REM Show detailed info about a file (size, permissions, timestamps)
-DELAY 500
-STRING read -p "File path: " f; stat "$f"
-ENTER

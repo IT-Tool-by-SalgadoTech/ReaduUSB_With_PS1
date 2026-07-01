@@ -1,4 +1,0 @@
-REM Check if USB storage module is loaded
-DELAY 500
-STRING lsmod | grep usb_storage && echo "USB storage: LOADED" || echo "USB storage: NOT LOADED (blocked)"
-ENTER

@@ -1,4 +1,0 @@
-REM Restart SSH server
-DELAY 500
-STRING sudo systemctl restart ssh && echo "SSH server restarted."
-ENTER

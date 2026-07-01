@@ -1,5 +1,0 @@
-DELAY 1500
-CTRL ALT T
-DELAY 2000
-STRING printf "source_folder: "; read source_folder; printf "destination_folder: "; read destination_folder; cmd="/bin/ln -s $source_folder $destination_folder"; print -z -- "$cmd"
-ENTER

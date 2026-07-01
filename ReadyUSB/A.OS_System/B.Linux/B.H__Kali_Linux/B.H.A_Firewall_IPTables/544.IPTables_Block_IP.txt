@@ -1,4 +1,0 @@
-REM Block all traffic from a specific IP (iptables)
-DELAY 500
-STRING read -p "IP to block: " ip; sudo iptables -A INPUT -s "$ip" -j DROP && sudo iptables -A OUTPUT -d "$ip" -j DROP && echo "IP $ip blocked in both directions."
-ENTER

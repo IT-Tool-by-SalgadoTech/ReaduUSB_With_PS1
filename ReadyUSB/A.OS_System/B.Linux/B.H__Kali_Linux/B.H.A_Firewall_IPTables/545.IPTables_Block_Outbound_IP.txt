@@ -1,4 +1,0 @@
-REM Block outbound connections to a specific IP (C2/exfiltration prevention)
-DELAY 500
-STRING read -p "Destination IP to block outbound: " ip; sudo iptables -A OUTPUT -d "$ip" -j DROP && echo "Outbound to $ip blocked."
-ENTER

@@ -1,7 +1,0 @@
-DELAY 1500
-CTRL ALT T
-DELAY 2000
-STRING /usr/bin/xprop -root _NET_CLIENT_LIST_STACKING | /usr/bin/grep -o '0x[0-9a-f]\+' | while read -r w; do pid=$(/usr/bin/xprop -id "$w" _NET_WM_PID 2>/dev/null | /usr/bin/grep -o '[0-9]\+'); [ -n "$pid" ] && /usr/bin/ps -p "$pid" -o pid,user,cmd --no-headers; done | /usr/bin/sort -u
-ENTER
-DELAY 1800
-ENTER

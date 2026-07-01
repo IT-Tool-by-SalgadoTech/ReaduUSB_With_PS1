@@ -1,4 +1,0 @@
-REM Find zombie (defunct) processes
-DELAY 500
-STRING ps aux | awk '$8 == "Z" {print}' | grep -v "STAT" && echo "Done. (No output = no zombies)"
-ENTER

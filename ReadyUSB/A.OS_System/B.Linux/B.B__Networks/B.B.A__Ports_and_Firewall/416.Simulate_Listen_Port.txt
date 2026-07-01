@@ -1,4 +1,0 @@
-REM Simulate a listening port using netcat (for testing, Ctrl+C to stop)
-DELAY 500
-STRING read -p "Port to simulate listening on: " p; echo "Listening on port $p (Ctrl+C to stop)..."; nc -lk "$p"
-ENTER

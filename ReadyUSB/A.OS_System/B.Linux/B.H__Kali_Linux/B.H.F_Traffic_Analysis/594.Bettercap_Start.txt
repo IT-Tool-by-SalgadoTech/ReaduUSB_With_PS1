@@ -1,4 +1,0 @@
-REM Start bettercap interactive session
-DELAY 500
-STRING read -p "Interface (e.g. eth0): " i; sudo bettercap -iface "$i" 2>/dev/null || echo "bettercap not installed. Run: sudo apt install bettercap"
-ENTER
