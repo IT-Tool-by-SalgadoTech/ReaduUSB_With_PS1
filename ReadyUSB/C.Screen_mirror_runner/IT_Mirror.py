@@ -4,7 +4,7 @@
 #  IT-Tool by SalgadoTech
 #  Script: IT_Mirror.py
 #  ScriptID: ST-WIN-0000-PY
-#  Version: 5.0
+#  Version: 5.1
 #  Date: 2026-06-17
 #  Category: Windows / Linux > Companion Tools
 #  Description: IT-Tool PC Mirror - Touch Edition. Receives the IT-Tool
@@ -186,7 +186,29 @@ class FrameReceiver(threading.Thread):
 
     def run(self):
         try:
-            ser = serial.Serial(self.port, self.baud, timeout=2)
+            # Abrir sin pulsar DTR/RTS: en Linux esas lineas estan cableadas
+            # a EN/BOOT del ESP32-S3 y provocan un reinicio al conectar el COM.
+            # Windows no las pulsa por defecto, por eso alli no reiniciaba.
+            ser = serial.Serial()
+            ser.port     = self.port
+            ser.baudrate = self.baud
+            ser.timeout  = 2
+            try:
+                ser.dtr = False
+                ser.rts = False
+            except Exception:
+                # Algunos drivers no permiten fijar dtr/rts antes de open;
+                # en ese caso se ignora y se abre igual (metodo clasico).
+                pass
+            ser.open()
+            # Dejar asentar la conexion y tirar la basura de arranque del ESP
+            # (mensajes de boot / frames a medias) para no desincronizar el
+            # parser y evitar comandos fantasma que saltan por el menu.
+            time.sleep(0.3)
+            try:
+                ser.reset_input_buffer()
+            except Exception:
+                pass
         except serial.SerialException as e:
             self.error = str(e)
             return
