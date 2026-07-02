@@ -329,11 +329,11 @@ def main():
     # ── Selección de puerto ───────────────────────────────────────────────────
     port = args.port
     if port is None:
-        print("Antes de continuar:")
-        print("  1. Desconecta el cable USB del IT-Tool")
-        print("  2. Vuelve a conectarlo")
+        print("Before continuing:")
+        print("  1. Push the IT-Tool Reset button")
         print("")
-        safe_input("Vuelve aqui y presiona ENTER...")
+        print("2. Come back here and press ENTER")
+        safe_input("")
         print("")
 
         ports = list_serial_ports()
