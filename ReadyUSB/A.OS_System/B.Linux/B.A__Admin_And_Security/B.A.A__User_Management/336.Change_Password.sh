@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================
 # IT-Tool by SalgadoTech
-# Script: 318_Change_Password.sh
-# ScriptID: ST-LIN-0318
+# Script: 336_Change_Password.sh
+# ScriptID: ST-LIN-0336
 # Version: 1.1
 # Date: 2025-05-22
 # Category: Linux > Admin And Security > User Management
@@ -35,8 +35,8 @@ echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
 echo -e '\033[0;36m\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
-echo -e '\033[0;36m  Script: 318_Change_Password.sh\033[0m'
-echo -e '\033[0;36m  ScriptID: ST-LIN-0318\033[0m'
+echo -e '\033[0;36m  Script: 336_Change_Password.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0336\033[0m'
 echo -e '\033[0;36m  Version: 1.1\033[0m'
 echo -e '\033[0;36m  Date: 2025-05-22\033[0m'
 echo -e '\033[0;36m  Category: Linux > Admin And Security > User Management\033[0m'

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================
 # IT-Tool by SalgadoTech
-# Script: 319_Check_User_Groups.sh
-# ScriptID: ST-LIN-0319
+# Script: 338_Check_User_Groups.sh
+# ScriptID: ST-LIN-0338
 # Version: 1.1
 # Date: 2025-05-22
 # Category: Linux > Admin And Security > User Management
@@ -26,8 +26,8 @@ echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
 echo -e '\033[0;36m\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
-echo -e '\033[0;36m  Script: 319_Check_User_Groups.sh\033[0m'
-echo -e '\033[0;36m  ScriptID: ST-LIN-0319\033[0m'
+echo -e '\033[0;36m  Script: 338_Check_User_Groups.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0338\033[0m'
 echo -e '\033[0;36m  Version: 1.1\033[0m'
 echo -e '\033[0;36m  Date: 2025-05-22\033[0m'
 echo -e '\033[0;36m  Category: Linux > Admin And Security > User Management\033[0m'

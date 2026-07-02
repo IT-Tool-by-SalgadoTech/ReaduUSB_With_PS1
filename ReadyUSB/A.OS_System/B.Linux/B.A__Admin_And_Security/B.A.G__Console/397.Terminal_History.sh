@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================
 # IT-Tool by SalgadoTech
-# Script: 398.Terminal_History.sh
-# ScriptID: ST-LIN-0398
+# Script: 397.Terminal_History.sh
+# ScriptID: ST-LIN-0397
 # Version: 1.0
 # Date: 2026-07-01
 # Category: Linux > Admin And Security > Console
@@ -27,8 +27,8 @@ echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
 echo -e '\033[0;36m\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
-echo -e '\033[0;36m  Script: 398.Terminal_History.sh\033[0m'
-echo -e '\033[0;36m  ScriptID: ST-LIN-0398\033[0m'
+echo -e '\033[0;36m  Script: 397.Terminal_History.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0397\033[0m'
 echo -e '\033[0;36m  Version: 1.0\033[0m'
 echo -e '\033[0;36m  Date: 2026-07-01\033[0m'
 echo -e '\033[0;36m  Category: Linux > Admin And Security > Console\033[0m'

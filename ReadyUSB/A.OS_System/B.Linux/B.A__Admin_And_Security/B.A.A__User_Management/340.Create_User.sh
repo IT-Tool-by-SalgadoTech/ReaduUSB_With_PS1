@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================
 # IT-Tool by SalgadoTech
-# Script: 321_Create_User.sh
-# ScriptID: ST-LIN-0321
+# Script: 340_Create_User.sh
+# ScriptID: ST-LIN-0340
 # Version: 1.1
 # Date: 2025-05-22
 # Category: Linux > Admin And Security > User Management
@@ -35,8 +35,8 @@ echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
 echo -e '\033[0;36m\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
-echo -e '\033[0;36m  Script: 321_Create_User.sh\033[0m'
-echo -e '\033[0;36m  ScriptID: ST-LIN-0321\033[0m'
+echo -e '\033[0;36m  Script: 340_Create_User.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0340\033[0m'
 echo -e '\033[0;36m  Version: 1.1\033[0m'
 echo -e '\033[0;36m  Date: 2025-05-22\033[0m'
 echo -e '\033[0;36m  Category: Linux > Admin And Security > User Management\033[0m'

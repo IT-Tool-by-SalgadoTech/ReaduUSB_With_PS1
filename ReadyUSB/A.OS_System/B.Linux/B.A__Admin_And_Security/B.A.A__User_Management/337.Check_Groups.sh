@@ -2,7 +2,7 @@
 # ==============================================================
 # IT-Tool by SalgadoTech
 # Script: ST-LIN-0322_Check_Groups.sh
-# ScriptID: ST-LIN-0322
+# ScriptID: ST-LIN-0337
 # Version: 1.0
 # Date: 2026-06-02
 # Category: Linux > Admin And Security > User Management
@@ -28,7 +28,7 @@ echo -e '\033[0;36m\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
 echo -e '\033[0;36m  Script: ST-LIN-0322_Check_Groups.sh\033[0m'
-echo -e '\033[0;36m  ScriptID: ST-LIN-0322\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0337\033[0m'
 echo -e '\033[0;36m  Version: 1.0\033[0m'
 echo -e '\033[0;36m  Date: 2026-06-02\033[0m'
 echo -e '\033[0;36m  Category: Linux > Admin And Security > User Management\033[0m'

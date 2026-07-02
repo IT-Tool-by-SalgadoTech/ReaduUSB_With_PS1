@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================
 # IT-Tool by SalgadoTech
-# Script: 322_Reboot_To_BIOS.sh
-# ScriptID: ST-LIN-0322
+# Script: 398_Reboot_To_BIOS.sh
+# ScriptID: ST-LIN-0398
 # Version: 1.0
 # Date: 2026-07-02
 # Category: Linux > Admin And Security > System
@@ -35,8 +35,8 @@ echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
 echo -e '\033[0;36m\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
-echo -e '\033[0;36m  Script: 322_Reboot_To_BIOS.sh\033[0m'
-echo -e '\033[0;36m  ScriptID: ST-LIN-0322\033[0m'
+echo -e '\033[0;36m  Script: 398_Reboot_To_BIOS.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0398\033[0m'
 echo -e '\033[0;36m  Version: 1.0\033[0m'
 echo -e '\033[0;36m  Date: 2026-07-02\033[0m'
 echo -e '\033[0;36m  Category: Linux > Admin And Security > System\033[0m'

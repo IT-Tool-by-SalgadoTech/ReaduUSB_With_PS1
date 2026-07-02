@@ -1,0 +1,100 @@
+Set-ExecutionPolicy Bypass -Scope Process -Force
+Write-Host ""
+Write-Host " _____ _____  _______ ____   ____  _     " -ForegroundColor Cyan
+Write-Host "|_   _|_   _||__   __/ __ \ / __ \| |    " -ForegroundColor Cyan
+Write-Host "  | |   | |     | | | |  | | |  | | |    " -ForegroundColor Cyan
+Write-Host "  | |   | |     | | | |  | | |  | | |    " -ForegroundColor Cyan
+Write-Host " _| |_  | |     | | | |__| | |__| | |___ " -ForegroundColor Cyan
+Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  ==================================================================" -ForegroundColor White
+Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
+Write-Host "  Script: 690.Unblock_Suspicious_IP.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0690" -ForegroundColor Cyan
+Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
+Write-Host "  Date: 2026-06-26" -ForegroundColor DarkCyan
+Write-Host "  Category: Windows > Networks" -ForegroundColor DarkCyan
+Write-Host "  Description: Removes IT-Tool firewall blocks created for a suspicious IP" -ForegroundColor DarkCyan
+Write-Host "  (c) 2025 SalgadoTech - All Rights Reserved" -ForegroundColor DarkCyan
+Write-Host "  Unauthorized distribution prohibited" -ForegroundColor DarkCyan
+Write-Host "  ==================================================================" -ForegroundColor White
+Write-Host ""
+
+# Admin check
+$currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
+$principal   = [Security.Principal.WindowsPrincipal]$currentUser
+if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "  ERROR: This script requires administrator privileges." -ForegroundColor Red
+    Write-Host "  Right-click the script and select 'Run as Administrator'." -ForegroundColor Yellow
+    Write-Host ""
+    Read-Host "Press Enter to exit..."
+    exit 1
+}
+
+# List currently blocked IPs
+$rules = Get-NetFirewallRule -DisplayName "ITTOOL_Block_IP_*" -ErrorAction SilentlyContinue
+if (-not $rules) {
+    Write-Host "  No IP blocks created by IT-Tool were found." -ForegroundColor Yellow
+    Write-Host ""
+    Read-Host "Press Enter to exit..."
+    exit 0
+}
+
+# Extract distinct IPs from rule names (ITTOOL_Block_IP_<ip>_In / _Out)
+$blocked = @{}
+foreach ($r in $rules) {
+    $name = $r.DisplayName
+    $core = $name -replace "^ITTOOL_Block_IP_", "" -replace "_(In|Out)$", ""
+    if ($core) { $blocked[$core] = $true }
+}
+
+Write-Host "  Currently blocked IP addresses:" -ForegroundColor White
+$i = 0
+foreach ($b in ($blocked.Keys | Sort-Object)) {
+    $i++
+    Write-Host ("    [{0}] {1}" -f $i, $b) -ForegroundColor Yellow
+}
+Write-Host ""
+
+$choice = Read-Host "Enter the IP to unblock, or type ALL to remove every IT-Tool IP block"
+if ([string]::IsNullOrWhiteSpace($choice)) {
+    Write-Host "  No selection made. Nothing changed." -ForegroundColor Yellow
+    Write-Host ""
+    Read-Host "Press Enter to exit..."
+    exit 0
+}
+$choice = $choice.Trim()
+
+if ($choice -ieq "ALL") {
+    try {
+        $rules | Remove-NetFirewallRule -ErrorAction Stop
+        Write-Host "  SUCCESS: Removed all IT-Tool IP blocks ($($rules.Count) rule(s))." -ForegroundColor Green
+    } catch {
+        Write-Host "  ERROR: Failed to remove some rules." -ForegroundColor Red
+        Write-Host ("  " + $_.Exception.Message) -ForegroundColor Yellow
+    }
+} else {
+    $parsed = $null
+    if (-not [System.Net.IPAddress]::TryParse($choice, [ref]$parsed)) {
+        Write-Host "  ERROR: '$choice' is not a valid IP address." -ForegroundColor Red
+        Write-Host ""
+        Read-Host "Press Enter to exit..."
+        exit 1
+    }
+    $ip = $parsed.ToString()
+    $target = Get-NetFirewallRule -DisplayName ("ITTOOL_Block_IP_" + $ip + "_*") -ErrorAction SilentlyContinue
+    if (-not $target) {
+        Write-Host "  NOTICE: No IT-Tool block found for '$ip'." -ForegroundColor Yellow
+    } else {
+        try {
+            $target | Remove-NetFirewallRule -ErrorAction Stop
+            Write-Host "  SUCCESS: Unblocked '$ip' ($($target.Count) rule(s) removed)." -ForegroundColor Green
+        } catch {
+            Write-Host "  ERROR: Failed to remove rules for '$ip'." -ForegroundColor Red
+            Write-Host ("  " + $_.Exception.Message) -ForegroundColor Yellow
+        }
+    }
+}
+
+Write-Host ""
+Read-Host "Press Enter to exit..."

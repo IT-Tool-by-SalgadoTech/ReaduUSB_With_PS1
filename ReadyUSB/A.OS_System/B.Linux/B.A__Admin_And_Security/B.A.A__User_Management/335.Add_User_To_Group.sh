@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================
 # IT-Tool by SalgadoTech
-# Script: 317_Add_User_To_Group.sh
-# ScriptID: ST-LIN-0317
+# Script: 335_Add_User_To_Group.sh
+# ScriptID: ST-LIN-0335
 # Version: 1.1
 # Date: 2025-05-22
 # Category: Linux > Admin And Security > User Management
@@ -35,8 +35,8 @@ echo -e '\033[0;36m |_____| |_|     |_|  \____/ \____/|_____|\033[0m'
 echo -e '\033[0;36m\033[0m'
 echo -e '\033[0;37m  ==================================================================\033[0m'
 echo -e '\033[0;36m  IT-Tool by SalgadoTech\033[0m'
-echo -e '\033[0;36m  Script: 317_Add_User_To_Group.sh\033[0m'
-echo -e '\033[0;36m  ScriptID: ST-LIN-0317\033[0m'
+echo -e '\033[0;36m  Script: 335_Add_User_To_Group.sh\033[0m'
+echo -e '\033[0;36m  ScriptID: ST-LIN-0335\033[0m'
 echo -e '\033[0;36m  Version: 1.1\033[0m'
 echo -e '\033[0;36m  Date: 2025-05-22\033[0m'
 echo -e '\033[0;36m  Category: Linux > Admin And Security > User Management\033[0m'
