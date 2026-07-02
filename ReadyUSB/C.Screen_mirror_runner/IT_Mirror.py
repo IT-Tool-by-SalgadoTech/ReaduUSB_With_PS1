@@ -135,24 +135,24 @@ def diag_frame(pixels, fw, fh):
 
     print("")
     print("=" * 56)
-    print("  [DIAG] Primer frame recibido")
-    print(f"  Dimensiones  : {fw} x {fh}")
+    print("  [DIAG] First frame received")
+    print(f"  Dimensions   : {fw} x {fh}")
     print(f"  Total pixels : {total}")
-    print(f"  Pixels cero  : {zeros}  ({pct_zero:.1f}%)")
-    print(f"  Pixels datos : {nonzero}  ({100-pct_zero:.1f}%)")
+    print(f"  Zero pixels  : {zeros}  ({pct_zero:.1f}%)")
+    print(f"  Data pixels  : {nonzero}  ({100-pct_zero:.1f}%)")
     print("")
-    print("  Primeros 10 valores RGB:")
+    print("  First 10 RGB values:")
     for i, (r, g, b) in enumerate(pixels[:10]):
         raw565 = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)
         print(f"    [{i:2d}]  RGB=({r:3d},{g:3d},{b:3d})  RGB565=0x{raw565:04X}")
     print("")
     if pct_zero > 99.0:
-        print("  *** ATENCION: frame casi completamente negro ***")
-        print("  *** El shadowFB del firmware parece estar vacio. ***")
-        print("  *** Bug en firmware: los overrides de MirrorGFX ***")
-        print("  *** no se estan disparando para ese path de draw. ***")
+        print("  *** WARNING: frame is almost completely black ***")
+        print("  *** The firmware shadowFB appears to be empty. ***")
+        print("  *** Firmware bug: the MirrorGFX overrides are ***")
+        print("  *** not firing for that draw path. ***")
     else:
-        print("  Frame tiene datos validos. El bug es en el renderizado Python.")
+        print("  Frame has valid data. The bug is in the Python rendering.")
     print("=" * 56)
     print("")
 
@@ -338,40 +338,40 @@ def main():
 
         ports = list_serial_ports()
         if not ports:
-            print("No se detectaron puertos COM. Verifica la conexion USB.")
-            safe_input("Presiona ENTER para cerrar.")
+            print("No COM ports detected. Check the USB connection.")
+            safe_input("Press ENTER to close.")
             sys.exit(1)
 
-        print("Puertos disponibles:")
+        print("Available serial ports:")
         for i, (dev, desc) in enumerate(ports):
             print(f"  {i+1}. {dev}  —  {desc}")
         print("")
 
         if len(ports) == 1:
-            print(f"Un solo puerto encontrado: {ports[0][0]}")
-            ans = safe_input("Usar este? [Y/n]: ").strip().lower()
+            print(f"Only one port found: {ports[0][0]}")
+            ans = safe_input("Use this one? [Y/n]: ").strip().lower()
             if ans in ("", "y", "s"):
                 port = ports[0][0]
             else:
-                safe_input("Conecta el IT-Tool y reinicia el script. ENTER para cerrar.")
+                safe_input("Connect the IT-Tool and restart the script. ENTER to close.")
                 sys.exit(0)
         else:
             while True:
                 try:
-                    n = int(safe_input("Selecciona numero de puerto: ").strip())
+                    n = int(safe_input("Select port number: ").strip())
                     if 1 <= n <= len(ports):
                         port = ports[n - 1][0]
                         break
                     else:
-                        print("  Opcion invalida.")
+                        print("  Invalid option.")
                 except (ValueError, KeyboardInterrupt):
-                    print("\nCancelado.")
+                    print("\nCancelled.")
                     sys.exit(0)
 
-        print(f"Usando {port}")
+        print(f"Using {port}")
         print("")
     else:
-        print(f"Usando puerto: {port}")
+        print(f"Using port: {port}")
 
     scale = max(1, args.scale)
 
@@ -413,8 +413,8 @@ def main():
     # Click del scroll (botón medio) alterna entre los dos modos.
     scroll_axis = 'Y'
 
-    print("Ve al menu del IT-Tool → PC_Mirror → Mirror ON.")
-    print("Al llegar el primer frame veras info de diagnostico en esta consola.")
+    print("Go to the IT-Tool menu → PC_Mirror → Mirror ON.")
+    print("Diagnostic info will appear in this console when the first frame arrives.")
 
     running = True
     while running:
