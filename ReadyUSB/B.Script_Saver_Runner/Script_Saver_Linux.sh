@@ -78,16 +78,13 @@ echo ""
 
 # ============================================================
 #  STEP 2 — CONTROLLED RESET
-#  Clean DTR-only pulse, wait for FULL boot, flush RX (IT_Mirror.py pattern).
-#  Avoids the Linux "random menu jump": mid-boot garbage misread as commands.
+#  Open @ 460800 with DTR/RTS deasserted, brief pulse, close.
+#  Mirrors PS1 DtrEnable=$false / RtsEnable=$false open/close.
 # ============================================================
 echo "${Y}IT-Tool reset, Please come to:${R}"
 python3 - "$COM_PORT" << 'PYRESET'
 import sys, os, time, termios, tty, fcntl, struct
 port = sys.argv[1]
-DTR = getattr(termios, 'TIOCM_DTR', 0x002)
-def dtr(fd, on):
-    fcntl.ioctl(fd, termios.TIOCMBIS if on else termios.TIOCMBIC, struct.pack('I', DTR))
 try:
     fd = os.open(port, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
     tty.setraw(fd)
@@ -98,16 +95,15 @@ try:
     attrs[2] &= ~termios.PARENB
     attrs[2] &= ~termios.CSTOPB
     attrs[2] |= (termios.CLOCAL | termios.CREAD)
-    attrs[2] &= ~termios.HUPCL        # no extra reset when we close the port
     termios.tcsetattr(fd, termios.TCSANOW, attrs)
-    # Clean DTR-only reset pulse (RTS untouched) -- same as IT_Mirror.py.
-    # Toggling both lines + a short wait leaves the ESP mid-boot, and boot
-    # garbage gets misread as menu commands (random menu jump on Linux).
-    dtr(fd, False); time.sleep(0.1)
-    dtr(fd, True);  time.sleep(0.1)
-    dtr(fd, False)
-    time.sleep(3.5)                          # wait for FULL boot to Home
-    termios.tcflush(fd, termios.TCIOFLUSH)    # discard boot garbage
+    # Deassert DTR + RTS (equivalent to PS1 DtrEnable/RtsEnable = false)
+    dtr = getattr(termios, 'TIOCM_DTR', 0x002)
+    rts = getattr(termios, 'TIOCM_RTS', 0x004)
+    try:
+        fcntl.ioctl(fd, termios.TIOCMBIC, struct.pack('I', dtr | rts))
+    except Exception:
+        pass
+    time.sleep(0.4)
     os.close(fd)
 except Exception as e:
     print(f"Reset warning: {e}", file=sys.stderr)
