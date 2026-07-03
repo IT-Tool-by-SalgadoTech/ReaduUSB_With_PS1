@@ -962,17 +962,49 @@ def check_usb_devices(cycle):
         except Exception:
             pass
         return info
+    # lsusb name map (Linux): resolves human-readable names from the usb.ids
+    # database even for hubs/controllers whose USB string descriptors are empty.
+    lsusb_names = {}
+    if os.name != 'nt':
+        for line in run_cmd("lsusb 2>/dev/null").splitlines():
+            if "ID " not in line:
+                continue
+            rest = line.split("ID ", 1)[1].strip()      # e.g. "0e8d:0608 MediaTek Inc. Wireless_Device"
+            vp   = rest[:9].lower()
+            name = rest[9:].strip()
+            if ":" in vp:
+                lsusb_names[vp] = name or vp
+
+    def _resolve_name(vid, pid, extra, cls):
+        """Never return 'N/A'/'Unknown': fall back lsusb -> class -> vid:pid."""
+        prod = (extra.get("product_name") or "").strip()
+        if prod and prod.upper() != "N/A":
+            return prod
+        vp = f"{vid:04x}:{pid:04x}"
+        if vp in lsusb_names:
+            return lsusb_names[vp]
+        return USB_CLASS.get(cls, f"USB Device {vid:04X}:{pid:04X}")
+
     current   = {}
     serial_vp = set()
     try:
         import serial.tools.list_ports as _lp
         for port in _lp.comports():
+            # Skip legacy motherboard UARTs (/dev/ttyS0..31, ttyAMA*, etc.):
+            # they are always-present kernel phantoms, NOT connected devices.
+            # A genuine USB-serial adapter has a VID/PID or "USB" in its hwid.
+            hwid_up = (port.hwid or "").upper()
+            if not port.vid and not port.pid and "USB" not in hwid_up:
+                continue
             vid = port.vid or 0
             pid = port.pid or 0
             extra = _usb_extra(vid, pid)
+            nm = (port.description or "").strip()
+            if not nm or nm.lower() == "n/a":
+                nm = _resolve_name(vid, pid, extra, 0xFF)
             d = {
                 "dev_type": "Serial/COM",
-                "name":     port.description or extra.get("product_name", "Unknown"),
+                "name":     nm,
                 "com_port": port.device,
                 "vid":      f"0x{vid:04X}" if vid else "N/A",
                 "pid":      f"0x{pid:04X}" if pid else "N/A",
@@ -1015,7 +1047,7 @@ def check_usb_devices(cycle):
                 bcd = getattr(dev, "bcdUSB", None)
                 d = {
                     "dev_type": USB_CLASS.get(cls, "USB Device"),
-                    "name":     extra.get("product_name", f"USB Device {vid:04X}:{pid:04X}"),
+                    "name":     _resolve_name(vid, pid, extra, cls),
                     "com_port": "N/A", "vid": f"0x{vid:04X}", "pid": f"0x{pid:04X}",
                     "mfr": extra.get("manufacturer", "N/A"), "sn": extra.get("serial_number", "N/A"),
                     "mac": "N/A", "hwid": f"{vid:04X}:{pid:04X}",
