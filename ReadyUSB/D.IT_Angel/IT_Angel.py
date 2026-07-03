@@ -200,14 +200,27 @@ def get_tshark_interface():
 # --- OS SELECTION --------------------------------------------------------
 def select_os():
     global g_os_target
-    print(WHITE + "  Which system will IT Angel protect today?\n")
+    host = "windows" if os.name == "nt" else "linux"
+    print(WHITE + "  Which system will IT Angel protect today?")
+    print(DIM   + f"  (detected host: {host.upper()})\n")
     print(f"  {GREEN}[1]{RESET} Windows")
     print(f"  {GREEN}[2]{RESET} Linux\n")
     while True:
-        c = input(f"  {CYAN}Select (1/2): {RESET}").strip()
-        if c == "1":   g_os_target = "windows"; print(f"\n  {GREEN}Windows mode.{RESET}\n"); break
-        elif c == "2": g_os_target = "linux";   print(f"\n  {GREEN}Linux mode.{RESET}\n");   break
-        else:          print(f"  {RED}Enter 1 or 2.{RESET}")
+        c = input(f"  {CYAN}Select (1/2) [Enter = {host}]: {RESET}").strip()
+        if   c == "":  g_os_target = host
+        elif c == "1": g_os_target = "windows"
+        elif c == "2": g_os_target = "linux"
+        else:          print(f"  {RED}Enter 1 or 2.{RESET}"); continue
+        # A Linux box cannot run wevtutil/reg/powershell and a Windows box cannot
+        # run systemctl/lsusb - a mismatched choice produces empty/garbage output.
+        if g_os_target != host:
+            print(f"\n  {YELLOW}WARNING: you chose {g_os_target.upper()} but this machine is {host.upper()}.{RESET}")
+            print(f"  {YELLOW}{g_os_target.upper()}-only checks cannot run here and will be empty.{RESET}")
+            ans = input(f"  {CYAN}Continue anyway? (y/N): {RESET}").strip().lower()
+            if ans != "y":
+                continue
+        print(f"\n  {GREEN}{g_os_target.capitalize()} mode.{RESET}\n")
+        break
 
 # --- DURATION SELECTION --------------------------------------------------
 def select_duration():
@@ -962,10 +975,15 @@ def check_usb_devices(cycle):
         except Exception:
             pass
         return info
-    # lsusb name map (Linux): resolves human-readable names from the usb.ids
-    # database even for hubs/controllers whose USB string descriptors are empty.
+    # OS switch: the whole enumeration branches on the user's selected target.
+    # Windows keeps its original logic; Linux gets the phantom-UART filter and
+    # lsusb name resolution. Neither path touches the other.
+    is_win = (g_os_target == "windows")
+
+    # lsusb name map (Linux only): resolves human-readable names from the
+    # usb.ids database even for hubs/controllers with empty string descriptors.
     lsusb_names = {}
-    if os.name != 'nt':
+    if not is_win:
         for line in run_cmd("lsusb 2>/dev/null").splitlines():
             if "ID " not in line:
                 continue
@@ -975,8 +993,8 @@ def check_usb_devices(cycle):
             if ":" in vp:
                 lsusb_names[vp] = name or vp
 
-    def _resolve_name(vid, pid, extra, cls):
-        """Never return 'N/A'/'Unknown': fall back lsusb -> class -> vid:pid."""
+    def _resolve_name_lin(vid, pid, extra, cls):
+        """Linux: never return 'N/A'/'Unknown' - fall back lsusb -> class -> vid:pid."""
         prod = (extra.get("product_name") or "").strip()
         if prod and prod.upper() != "N/A":
             return prod
@@ -987,21 +1005,27 @@ def check_usb_devices(cycle):
 
     current   = {}
     serial_vp = set()
+
+    # ---- Pass 1: serial / COM ports (pyserial) ----
     try:
         import serial.tools.list_ports as _lp
         for port in _lp.comports():
-            # Skip legacy motherboard UARTs (/dev/ttyS0..31, ttyAMA*, etc.):
-            # they are always-present kernel phantoms, NOT connected devices.
-            # A genuine USB-serial adapter has a VID/PID or "USB" in its hwid.
-            hwid_up = (port.hwid or "").upper()
-            if not port.vid and not port.pid and "USB" not in hwid_up:
-                continue
+            if not is_win:
+                # Linux only: drop legacy motherboard UARTs (/dev/ttyS0..31,
+                # ttyAMA*, etc.) - always-present kernel phantoms, not devices.
+                # A real USB-serial adapter has a VID/PID or "USB" in its hwid.
+                hwid_up = (port.hwid or "").upper()
+                if not port.vid and not port.pid and "USB" not in hwid_up:
+                    continue
             vid = port.vid or 0
             pid = port.pid or 0
             extra = _usb_extra(vid, pid)
-            nm = (port.description or "").strip()
-            if not nm or nm.lower() == "n/a":
-                nm = _resolve_name(vid, pid, extra, 0xFF)
+            if is_win:
+                nm = port.description or extra.get("product_name", "Unknown")
+            else:
+                nm = (port.description or "").strip()
+                if not nm or nm.lower() == "n/a":
+                    nm = _resolve_name_lin(vid, pid, extra, 0xFF)
             d = {
                 "dev_type": "Serial/COM",
                 "name":     nm,
@@ -1018,6 +1042,8 @@ def check_usb_devices(cycle):
             serial_vp.add((vid, pid))
     except Exception:
         pass
+
+    # ---- Pass 2: USB network adapters (MAC heuristic - both OSes) ----
     try:
         USB_NET_KW = ("usb", "rndis", "gadget", "android", "tethering", "mobile")
         for iface, addrs in psutil.net_if_addrs().items():
@@ -1033,6 +1059,8 @@ def check_usb_devices(cycle):
                     current[_dev_key(d)] = d
     except Exception:
         pass
+
+    # ---- Pass 3: all other USB devices (pyusb find_all - both OSes) ----
     try:
         import usb.core as _usbc
         all_devs = _usbc.find(find_all=True)
@@ -1045,9 +1073,13 @@ def check_usb_devices(cycle):
                 extra = _usb_extra(vid, pid)
                 cls = getattr(dev, "bDeviceClass", 0xFF)
                 bcd = getattr(dev, "bcdUSB", None)
+                if is_win:
+                    nm = extra.get("product_name", f"USB Device {vid:04X}:{pid:04X}")
+                else:
+                    nm = _resolve_name_lin(vid, pid, extra, cls)
                 d = {
                     "dev_type": USB_CLASS.get(cls, "USB Device"),
-                    "name":     _resolve_name(vid, pid, extra, cls),
+                    "name":     nm,
                     "com_port": "N/A", "vid": f"0x{vid:04X}", "pid": f"0x{pid:04X}",
                     "mfr": extra.get("manufacturer", "N/A"), "sn": extra.get("serial_number", "N/A"),
                     "mac": "N/A", "hwid": f"{vid:04X}:{pid:04X}",
@@ -2867,9 +2899,11 @@ class _WatchmanApp(App):
 
     def _render_security(self):
         cells = []
-        for lbl in _CHECK_LABELS:
+        # Grid reflects ONLY the checks that ran for the selected OS (in order).
+        labels = list(self.check_status.keys()) or _CHECK_LABELS
+        for lbl in labels:
             st = self.check_status.get(lbl, "-")
-            cells.append("%s %s" % (_DOT.get(st, _DOT["-"]), ("%-22s" % lbl)))
+            cells.append("%s %s" % (_DOT.get(st, _DOT["-"]), ("%-26s" % lbl[:26])))
         grid = "\n".join("   ".join(cells[i:i+3]) for i in range(0, len(cells), 3))
         self.query_one("#checks", Static).update(
             "[bold cyan]SECURITY CHECKS[/]  [dim](cycle %s)[/]\n\n%s" % (self.cycle_num, grid))
@@ -3069,6 +3103,69 @@ def show_live_traffic_and_countdown(wait_seconds, cycle_num, duration_end=None,
     print()
 
 
+# --- OS-AWARE CHECK REGISTRY ---------------------------------------------
+# Single source of truth for WHICH checks run and HOW they are labelled per OS.
+# applies: "both" | "windows" | "linux"   (a check absent on an OS never runs
+# and never shows in the dashboard grid for that OS).
+# win_label / lin_label: the name shown in the console + Watchman grid for that
+# OS. Use OS-appropriate wording so Linux never displays Windows-only terms.
+#            (function,                    applies,    windows label,             linux label)
+CHECK_REGISTRY = [
+    (check_active_connections,     "both",    "Active Connections",       "Active Connections"),
+    (check_listening_ports,        "both",    "Listening Ports",          "Listening Ports"),
+    (check_extended_ports,         "both",    "Extended Port Scan",       "Extended Port Scan"),
+    (check_network_processes,      "both",    "Net Processes",            "Net Processes"),
+    (check_privileged_processes,   "both",    "Privileged Processes",     "Privileged Processes"),
+    (check_resources,              "both",    "Resources (CPU/RAM)",      "Resources (CPU/RAM)"),
+    (check_logged_users,           "both",    "Logged Users",             "Logged Users"),
+    (check_local_users,            "both",    "Local Users & Admins",     "Local Users & Admins"),
+    (check_rdp_sessions,           "both",    "RDP / Remote Sessions",    "Remote Sessions (SSH)"),
+    (check_services,               "both",    "Services",                 "Services (systemd)"),
+    (check_firewall,               "both",    "Firewall",                 "Firewall (ufw/nft)"),
+    (check_usb_devices,            "both",    "USB Devices",              "USB Devices"),
+    (check_dns_gateway,            "both",    "DNS & Gateway",            "DNS & Gateway"),
+    (check_scheduled_tasks,        "both",    "Scheduled Tasks",          "Scheduled Tasks (cron)"),
+    (check_local_network,          "both",    "LAN Devices (ARP)",        "LAN Devices (ARP)"),
+    (check_system_events,          "both",    "System Events",            "System Events (auth.log)"),
+    (check_security_events_detail, "both",    "Security Events Detail",   "Security Events Detail"),
+    (check_open_shares,            "both",    "Network Shares",           "Network Shares (SMB/NFS)"),
+    (check_startup_items,          "both",    "Startup Items",            "Startup Items (systemd)"),
+    (check_recent_software,        "both",    "Recent Software",          "Recent Software (pkgs)"),
+    (check_system_file_integrity,  "both",    "File Integrity",           "File Integrity"),
+    (check_defender_status,        "both",    "Defender / AV",            "Antivirus / AV"),
+    (check_windows_update,         "both",    "Windows Update",           "System Updates (apt)"),
+    (check_bitlocker_secureboot,   "both",    "BitLocker / SecureBoot",   "Disk Encryption / SecureBoot"),
+    (check_audit_policy,           "both",    "Audit Policy",             "Audit Policy (auditd)"),
+    (check_event_log_cleared,      "both",    "Event Log Cleared",        "Log Tampering (journal)"),
+    (check_shadow_copies,          "windows", "Shadow Copies",            None),   # Windows-only concept
+    (check_system_time,            "both",    "System Time",              "System Time"),
+    (check_registry_autoruns,      "both",    "Registry Autoruns",        "Autostart / Persistence"),
+    (check_wmi_subscriptions,      "windows", "WMI Subscriptions",        None),   # Windows-only concept
+    (check_browser_extensions,     "both",    "Browser Extensions",       "Browser Extensions"),
+    (check_beaconing,              "both",    "Beaconing",                "Beaconing"),
+    (check_arp_spoofing,           "both",    "ARP / Gateway",            "ARP / Gateway"),
+    (check_process_lineage,        "both",    "Process Lineage",          "Process Lineage"),
+    (check_ransomware_indicators,  "both",    "Ransomware IOC",           "Ransomware IOC"),
+    (check_webcam_mic,             "both",    "Webcam / Mic",             "Webcam / Mic"),
+]
+
+def get_active_checks():
+    """Return [(label, fn), ...] for the SELECTED OS only. This is what makes
+    the Windows/Linux menu choice actually condition the run + the dashboard."""
+    win = (g_os_target == "windows")
+    out = []
+    for fn, applies, win_label, lin_label in CHECK_REGISTRY:
+        if applies == "windows" and not win:  continue
+        if applies == "linux"   and win:      continue
+        label = win_label if win else lin_label
+        if label:
+            out.append((label, fn))
+    return out
+
+def get_active_check_labels():
+    return [label for label, _ in get_active_checks()]
+
+
 # --- FULL CYCLE RUNNER ---------------------------------------------------
 def run_full_cycle(cycle_num):
     all_tech = []; all_exec = []
@@ -3088,44 +3185,11 @@ def run_full_cycle(cycle_num):
             check_status[label] = "ERR"
             print(f"    {RED}x {label}: {ex}{RESET}")
     print(f"\n  {CYAN}{'='*60}{RESET}")
-    print(f"  {WHITE}Cycle {cycle_num} - {now_str()}{RESET}")
+    print(f"  {WHITE}Cycle {cycle_num} - {now_str()}  [{g_os_target.upper()}]{RESET}")
     print(f"  {CYAN}{'='*60}{RESET}\n")
-    run_check("Active Connections",      check_active_connections,     cycle_num)
-    run_check("Listening Ports",         check_listening_ports,        cycle_num)
-    run_check("Extended Port Scan",      check_extended_ports,         cycle_num)
-    run_check("Net Processes",           check_network_processes,      cycle_num)
-    run_check("Privileged Processes",    check_privileged_processes,   cycle_num)
-    run_check("Resources (CPU/RAM)",     check_resources,              cycle_num)
-    run_check("Logged Users",            check_logged_users,           cycle_num)
-    run_check("Local Users & Admins",    check_local_users,            cycle_num)
-    run_check("RDP / Remote Sessions",   check_rdp_sessions,           cycle_num)
-    run_check("Services",                check_services,               cycle_num)
-    run_check("Firewall",                check_firewall,               cycle_num)
-    run_check("USB Devices",             check_usb_devices,            cycle_num)
-    run_check("DNS & Gateway",           check_dns_gateway,            cycle_num)
-    run_check("Scheduled Tasks",         check_scheduled_tasks,        cycle_num)
-    run_check("LAN Devices (ARP)",       check_local_network,          cycle_num)
-    run_check("System Events",           check_system_events,          cycle_num)
-    run_check("Security Events Detail",  check_security_events_detail, cycle_num)
-    run_check("Network Shares",          check_open_shares,            cycle_num)
-    run_check("Startup Items",           check_startup_items,          cycle_num)
-    run_check("Recent Software",         check_recent_software,        cycle_num)
-    run_check("File Integrity",          check_system_file_integrity,  cycle_num)
-    run_check("Defender / AV",           check_defender_status,        cycle_num)
-    run_check("Windows Update",          check_windows_update,         cycle_num)
-    run_check("BitLocker / SecureBoot",  check_bitlocker_secureboot,   cycle_num)
-    run_check("Audit Policy",            check_audit_policy,           cycle_num)
-    run_check("Event Log Cleared",       check_event_log_cleared,      cycle_num)
-    run_check("Shadow Copies",           check_shadow_copies,          cycle_num)
-    run_check("System Time",             check_system_time,            cycle_num)
-    run_check("Registry Autoruns",       check_registry_autoruns,      cycle_num)
-    run_check("WMI Subscriptions",       check_wmi_subscriptions,      cycle_num)
-    run_check("Browser Extensions",      check_browser_extensions,     cycle_num)
-    run_check("Beaconing",               check_beaconing,              cycle_num)
-    run_check("ARP / Gateway",           check_arp_spoofing,           cycle_num)
-    run_check("Process Lineage",         check_process_lineage,        cycle_num)
-    run_check("Ransomware IOC",          check_ransomware_indicators,  cycle_num)
-    run_check("Webcam / Mic",            check_webcam_mic,             cycle_num)
+    # Only the checks that apply to the SELECTED OS run, with OS-correct labels.
+    for label, fn in get_active_checks():
+        run_check(label, fn, cycle_num)
     print(f"\n  {DIM}Saving to Excel...{RESET}", end="\r")
     append_to_excel(all_tech, all_exec)
     print(f"  {GREEN}Excel updated - {g_excel_path}{RESET}")
