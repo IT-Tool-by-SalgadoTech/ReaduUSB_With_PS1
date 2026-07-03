@@ -9,12 +9,12 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by ITTOOL" -ForegroundColor Cyan
-Write-Host "  Script: 677.Stop_SoftAP_HostedNetwork.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0677" -ForegroundColor Cyan
+Write-Host "  Script: 669.Enable_Firewall_AllProfiles.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0669" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Networks" -ForegroundColor DarkCyan
-Write-Host "  Description: Stops and disallows the Wi-Fi hosted network (SoftAP) so the machine stops acting as an access point" -ForegroundColor DarkCyan
+Write-Host "  Description: Enables the Windows Firewall on the Domain, Private, and Public profiles" -ForegroundColor DarkCyan
 Write-Host "  (c) 2026 ITTOOL - All Rights Reserved" -ForegroundColor DarkCyan
 Write-Host "  Unauthorized distribution prohibited" -ForegroundColor DarkCyan
 Write-Host "  ==================================================================" -ForegroundColor White
@@ -30,29 +30,26 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
     exit 1
 }
 
-Write-Host "  Hosted network status before action:" -ForegroundColor White
-$before = netsh wlan show hostednetwork | Select-String "Status"
-if ($before) { Write-Host ("    " + $before.ToString().Trim()) -ForegroundColor Cyan }
-
-$stopOut    = netsh wlan stop hostednetwork 2>&1
-$disallow   = netsh wlan set hostednetwork mode=disallow 2>&1
-
-Start-Sleep -Seconds 1
-$after = (netsh wlan show hostednetwork | Select-String "Status")
-$isStarted = $after -match "Started"
-
-if (-not $isStarted) {
-    Write-Host "  Hosted network stopped and set to disallow." -ForegroundColor Green
-} else {
-    Write-Host "  WARNING: Hosted network may still be active. Check the output below." -ForegroundColor Red
-    Write-Host ("    " + $stopOut) -ForegroundColor Yellow
-    Write-Host ("    " + $disallow) -ForegroundColor Yellow
+try {
+    Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True -ErrorAction Stop
+    Write-Host "  Firewall enable command applied to all profiles." -ForegroundColor Green
+} catch {
+    Write-Host "  ERROR: Could not apply firewall enable command." -ForegroundColor Red
+    Write-Host ("  " + $_.Exception.Message) -ForegroundColor Yellow
+    Write-Host ""
+    Read-Host "Press Enter to exit..."
+    exit 1
 }
 
 Write-Host ""
-Write-Host "  Note: this targets the legacy Wi-Fi hosted network. The Windows" -ForegroundColor White
-Write-Host "  'Mobile hotspot' feature is separate and may need to be turned off" -ForegroundColor White
-Write-Host "  from Settings if it is the source of the access point." -ForegroundColor White
+Write-Host "  Current firewall profile state:" -ForegroundColor White
+foreach ($p in (Get-NetFirewallProfile)) {
+    if ($p.Enabled) {
+        Write-Host ("    {0,-8} : ENABLED" -f $p.Name) -ForegroundColor Green
+    } else {
+        Write-Host ("    {0,-8} : DISABLED" -f $p.Name) -ForegroundColor Red
+    }
+}
 
 Write-Host ""
 Read-Host "Press Enter to exit..."
