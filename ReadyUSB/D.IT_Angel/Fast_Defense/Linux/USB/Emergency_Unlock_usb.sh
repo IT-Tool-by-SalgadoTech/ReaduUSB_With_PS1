@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0644  |  648.Emergency_Unlock_usb.sh
+# ScriptID: ST-LIN  |  Emergency_Unlock_usb.sh
 # Master USB recovery. Reverses every USB lock mechanism used by 647 in one pass.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if   [ -f "$DIR/_itlib.sh" ];       then . "$DIR/_itlib.sh"
@@ -22,8 +22,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 644.Emergency_Unlock_usb.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0644${C_RS}"
+echo "${C_CY}  Script: Emergency_Unlock_usb.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > USB${C_RS}"

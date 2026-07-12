@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0657  |  661.Enable_Firewall.sh
+# ScriptID: ST-LIN  |  Enable_Firewall.sh
 # Enables the host firewall using whichever manager is present (ufw / firewalld / nftables / iptables).
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if   [ -f "$DIR/_itlib.sh" ];    then . "$DIR/_itlib.sh"
@@ -18,8 +18,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 657.Enable_Firewall.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0657${C_RS}"
+echo "${C_CY}  Script: Enable_Firewall.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Firewall & Ports${C_RS}"

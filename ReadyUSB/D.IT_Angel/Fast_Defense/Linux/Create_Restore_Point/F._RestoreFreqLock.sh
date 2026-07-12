@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0640  |  644.F._RestoreFreqLock.sh
+# ScriptID: ST-LIN  |  F._RestoreFreqLock.sh
 # Restores the 24-hour minimum interval for creating restore points.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if   [ -f "$DIR/_itlib.sh" ];       then . "$DIR/_itlib.sh"
@@ -21,8 +21,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 640.F._RestoreFreqLock.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0640${C_RS}"
+echo "${C_CY}  Script: F._RestoreFreqLock.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Restore Point${C_RS}"

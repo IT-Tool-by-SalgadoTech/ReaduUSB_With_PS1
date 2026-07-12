@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0667  |  671.Sudo_Password_On.sh
+# ScriptID: ST-LIN  |  Sudo_Password_On.sh
 # Linux analog of "UAC On": re-enforces a password prompt for privilege escalation
 # by finding and neutralising passwordless-sudo (NOPASSWD) rules.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,8 +19,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 667.Sudo_Password_On.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0667${C_RS}"
+echo "${C_CY}  Script: Sudo_Password_On.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Admin & Security${C_RS}"

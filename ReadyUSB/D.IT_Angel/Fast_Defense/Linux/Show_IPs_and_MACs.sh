@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0665  |  668.Show_IPs_and_MACs.sh
+# ScriptID: ST-LIN  |  Show_IPs_and_MACs.sh
 # Sweeps the local subnet to list active device IP/MACs, shows local interface MACs,
 # and lists all IP/MAC addresses currently blocked by IT-Tool.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,8 +19,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 665.Show_IPs_and_MACs.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0665${C_RS}"
+echo "${C_CY}  Script: Show_IPs_and_MACs.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Networks${C_RS}"

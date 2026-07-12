@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0662  |  665.Restart_AV_Service.sh
+# ScriptID: ST-LIN  |  Restart_AV_Service.sh
 # Linux analog of "Restart Defender": ensures the antivirus service (ClamAV) is running
 # and its on-access / freshclam updater is active.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,8 +19,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 662.Restart_AV_Service.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0662${C_RS}"
+echo "${C_CY}  Script: Restart_AV_Service.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Admin & Security${C_RS}"

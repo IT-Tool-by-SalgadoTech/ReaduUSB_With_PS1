@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0651  |  657.Close_a_port_fix1.sh
+# ScriptID: ST-LIN  |  Close_a_port_fix1.sh
 # Identifies and kills the process (or stops the service) listening on a given TCP/UDP port.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if   [ -f "$DIR/_itlib.sh" ];    then . "$DIR/_itlib.sh"
@@ -18,8 +18,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 651.Close_a_port_fix1.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0651${C_RS}"
+echo "${C_CY}  Script: Close_a_port_fix1.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Firewall & Ports${C_RS}"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0635  |  639.A._Enable_SystemProtection.sh
+# ScriptID: ST-LIN  |  A._Enable_SystemProtection.sh
 # Linux analog of "Enable System Protection": prepares the restore-point store.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if   [ -f "$DIR/_itlib.sh" ];       then . "$DIR/_itlib.sh"
@@ -21,8 +21,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 635.A._Enable_SystemProtection.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0635${C_RS}"
+echo "${C_CY}  Script: A._Enable_SystemProtection.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Restore Point${C_RS}"

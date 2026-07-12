@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0664  |  667.Restore_Service_Defaults.sh
+# ScriptID: ST-LIN  |  Restore_Service_Defaults.sh
 # Linux analog of restoring a tampered service registry key: un-masks a service,
 # restores its vendor preset, reloads systemd and clears failed state.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,8 +19,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 664.Restore_Service_Defaults.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0664${C_RS}"
+echo "${C_CY}  Script: Restore_Service_Defaults.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Admin & Security${C_RS}"

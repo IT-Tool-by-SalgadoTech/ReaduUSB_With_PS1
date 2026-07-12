@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0650  |  654.Bluetooth_Reset.sh
+# ScriptID: ST-LIN  |  Bluetooth_Reset.sh
 # Linux analog of the Windows "Swift Pair" reset: hardens fast-pair discovery by
 # power-cycling the Bluetooth radio, disabling discoverability and restarting the stack.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,8 +19,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 650.Bluetooth_Reset.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0650${C_RS}"
+echo "${C_CY}  Script: Bluetooth_Reset.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Bluetooth${C_RS}"

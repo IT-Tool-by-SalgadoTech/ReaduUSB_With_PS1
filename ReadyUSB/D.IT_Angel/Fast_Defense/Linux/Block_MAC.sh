@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0647  |  652.Block_MAC.sh
+# ScriptID: ST-LIN  |  Block_MAC.sh
 # Resolves a MAC to its current IP via the neighbour (ARP/ND) table and blocks it.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if   [ -f "$DIR/_itlib.sh" ];    then . "$DIR/_itlib.sh"
@@ -18,8 +18,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 647.Block_MAC.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0647${C_RS}"
+echo "${C_CY}  Script: Block_MAC.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Networks${C_RS}"

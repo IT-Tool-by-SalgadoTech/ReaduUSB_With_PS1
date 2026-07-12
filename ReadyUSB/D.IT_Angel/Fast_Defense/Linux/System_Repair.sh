@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0668  |  670.System_Repair.sh
+# ScriptID: ST-LIN  |  System_Repair.sh
 # Linux analog of SFC/DISM: verifies and repairs installed packages and system files
 # using the distro's package manager, and schedules a filesystem check.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,8 +19,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 668.System_Repair.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0668${C_RS}"
+echo "${C_CY}  Script: System_Repair.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Admin & Security${C_RS}"

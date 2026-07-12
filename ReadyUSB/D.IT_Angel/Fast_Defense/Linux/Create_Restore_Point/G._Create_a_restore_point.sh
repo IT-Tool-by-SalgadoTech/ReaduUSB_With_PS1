@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0641  |  645.G._Create_a_restore_point.sh
+# ScriptID: ST-LIN  |  G._Create_a_restore_point.sh
 # Creates a restore point: a tar archive of /etc plus the installed-package list,
 # honouring the FREQ_MINUTES restriction. Native snapshot is used when available.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,8 +23,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 641.G._Create_a_restore_point.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0641${C_RS}"
+echo "${C_CY}  Script: G._Create_a_restore_point.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Restore Point${C_RS}"

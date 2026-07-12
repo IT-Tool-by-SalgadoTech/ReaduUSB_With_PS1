@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0671  |  674.Wi-Fi_Off.sh
+# ScriptID: ST-LIN  |  Wi-Fi_Off.sh
 # Disables all Wi-Fi radios on the system.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if   [ -f "$DIR/_itlib.sh" ];    then . "$DIR/_itlib.sh"
@@ -18,8 +18,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 671.Wi-Fi_Off.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0671${C_RS}"
+echo "${C_CY}  Script: Wi-Fi_Off.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Networks${C_RS}"

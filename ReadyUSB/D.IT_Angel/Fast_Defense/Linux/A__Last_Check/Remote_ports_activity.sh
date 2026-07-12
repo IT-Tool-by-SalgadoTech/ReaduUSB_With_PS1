@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0630  |  633.Remote_ports_activity.sh
+# ScriptID: ST-LIN  |  Remote_ports_activity.sh
 # Displays all established TCP connections to remote hosts with the owning process.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if   [ -f "$DIR/_itlib.sh" ];       then . "$DIR/_itlib.sh"
@@ -18,8 +18,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 630.Remote_ports_activity.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0630${C_RS}"
+echo "${C_CY}  Script: Remote_ports_activity.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Networks${C_RS}"

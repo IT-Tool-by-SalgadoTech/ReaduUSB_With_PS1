@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0654  |  655.Close_RDP_Fix1.sh
+# ScriptID: ST-LIN  |  Close_RDP_Fix1.sh
 # Disables Remote Desktop by stopping and disabling the RDP servers (xrdp / gnome-remote-desktop).
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if   [ -f "$DIR/_itlib.sh" ];    then . "$DIR/_itlib.sh"
@@ -18,8 +18,8 @@ printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
 printf '\n'
 echo "${C_WH}  ==================================================================${C_RS}"
 echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
-echo "${C_CY}  Script: 654.Close_RDP_Fix1.sh${C_RS}"
-echo "${C_CY}  ScriptID: ST-LIN-0654${C_RS}"
+echo "${C_CY}  Script: Close_RDP_Fix1.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN${C_RS}"
 echo "${C_CY}  Version: 1.0${C_RS}"
 echo "${C_CY}  Date: 2026-07-12${C_RS}"
 echo "${C_CY}  Category: Linux > Remote Desktop${C_RS}"
