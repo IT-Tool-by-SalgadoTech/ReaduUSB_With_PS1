@@ -9,34 +9,37 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 639.B._Enable_SystemProtection.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0639" -ForegroundColor Cyan
+Write-Host "  Script: 690.H._RestoreFreqLock.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0690" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > System Restore" -ForegroundColor DarkCyan
-Write-Host "  Description: Enables System Protection for drive C:" -ForegroundColor DarkCyan
+Write-Host "  Description: Restores the 24-hour restore point creation restriction" -ForegroundColor DarkCyan
 Write-Host "  (c) 2025 SalgadoTech - All Rights Reserved" -ForegroundColor DarkCyan
 Write-Host "  Unauthorized distribution prohibited" -ForegroundColor DarkCyan
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host ""
 
-# ── Admin check ────────────────────────────────────
+# ── Admin check ───────────────────────────────────────────────────────────────
 $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal   = [Security.Principal.WindowsPrincipal]$currentUser
-$isAdmin     = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-
-if (-not $isAdmin) {
+if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "  ERROR: This script requires administrator privileges." -ForegroundColor Red
-    Write-Host "  Close this window, right-click the script and select" -ForegroundColor Yellow
-    Write-Host "  'Run with PowerShell as administrator'." -ForegroundColor Yellow
+    Write-Host "  Right-click the script and select 'Run as Administrator'." -ForegroundColor Yellow
     Write-Host ""
     Read-Host "Press Enter to exit..."
     exit 1
 }
 
-# ── Enable system protection on C:\ ───────────────────────────────────
-Write-Host "  Enabling System Protection on C:\..." -ForegroundColor Cyan
-Enable-ComputerRestore -Drive "C:\"
-Write-Host "Protection system successfully enabled.." -ForegroundColor Green
+# ── Restore 24-hour frequency restriction ─────────────────────────────────────
+Write-Host "  Restoring 24-hour restore point frequency restriction..." -ForegroundColor Cyan
+try {
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore" `
+        -Name "SystemRestorePointCreationFrequency" -Value 1440 -Type DWord -ErrorAction Stop
+    Write-Host "  Restriction restored. Minimum interval is now 1440 minutes (24 hours)." -ForegroundColor Green
+} catch {
+    Write-Host "  ERROR: Failed to update registry. $_" -ForegroundColor Red
+}
+
 Write-Host ""
-Read-Host "Press ENTER to exit..."
+Read-Host "Press Enter to exit..."

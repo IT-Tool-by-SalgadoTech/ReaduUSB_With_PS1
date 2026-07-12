@@ -10,7 +10,7 @@ Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by ITTOOL" -ForegroundColor Cyan
 Write-Host "  Script: Emergency_Unlock_usb.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0648" -ForegroundColor Cyan
+Write-Host "  ScriptID: ST-WIN-0694" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-23" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Admin & Security" -ForegroundColor DarkCyan

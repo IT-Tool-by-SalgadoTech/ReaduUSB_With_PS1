@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 # ============================================================================
 #  IT-Tool by SalgadoTech
-#  Script: 649.USB_Detection.py
-#  ScriptID: ST-WIN-0649-PY
+#  Script: 695.USB_Detection.py
+#  ScriptID: ST-WIN-0695-PY
 #  Version: 1.0
 #  Date: 2025-05-27
 #  Category: Windows / Linux > Hardware
@@ -328,7 +328,7 @@ def print_header(started_at: str):
     print("")
     print(f"{W}  {bar}{R}")
     print(f"{C}  IT-Tool by SalgadoTech{R}")
-    print(f"{GR}  Script: 649.USB_Detection.py  |  ScriptID: ST-WIN-0649-PY  |  v1.0{R}")
+    print(f"{GR}  Script: 695.USB_Detection.py  |  ScriptID: ST-WIN-0695-PY  |  v1.0{R}")
     print(f"{GR}  Live USB Monitor — Refresh every 2s, Ctrl+C to exit{R}")
     print(f"{W}  {bar}{R}")
 

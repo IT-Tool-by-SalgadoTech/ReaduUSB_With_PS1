@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0647  |  647.Emergency_Lock_usb.sh
+# ScriptID: ST-LIN-0643  |  647.Emergency_Lock_usb.sh
 # Emergency USB lock. De-authorises every connected USB device and blocks new USB
 # installs, EXCEPT the Bluetooth radio chain, so an unlock can be delivered over BLE.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -11,7 +11,29 @@ STATE_DIR=/var/lib/ittool
 STATE_FILE="$STATE_DIR/usb_lock_state.txt"
 UDEV_RULE=/etc/udev/rules.d/99-ittool-usb-lock.rules
 
-it_banner "647.Emergency_Lock_usb.sh" "ST-LIN-0647" "Emergency USB lock: de-authorises all USB devices except the Bluetooth radio"
+# ---- ITTOOL HEADER ----
+it_detect_distro
+printf '\n'
+printf '%s%s%s\n' "$C_CY" ' _____ _____  _______ ____   ____  _     ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '|_   _|_   _||__   __/ __ \ / __ \| |    ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '  | |   | |     | | | |  | | |  | | |    ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '  | |   | |     | | | |  | | |  | | |    ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" ' _| |_  | |     | | | |__| | |__| | |___ ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
+printf '\n'
+echo "${C_WH}  ==================================================================${C_RS}"
+echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
+echo "${C_CY}  Script: 643.Emergency_Lock_usb.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN-0643${C_RS}"
+echo "${C_CY}  Version: 1.0${C_RS}"
+echo "${C_CY}  Date: 2026-07-12${C_RS}"
+echo "${C_CY}  Category: Linux > USB${C_RS}"
+echo "${C_CY}  Description: Emergency USB lock: de-authorises all USB devices except the Bluetooth radio${C_RS}"
+echo "${C_CY}  Detected OS: ${IT_DISTRO_PRETTY}  (family: ${IT_FAMILY}, pkg: ${IT_PKG:-none})${C_RS}"
+echo "${C_CY}  (c) 2026 SalgadoTech - All Rights Reserved${C_RS}"
+echo "${C_CY}  Unauthorized distribution prohibited${C_RS}"
+echo "${C_WH}  ==================================================================${C_RS}"
+echo ""
 it_need_root "$@"
 
 # --- Detect a Bluetooth USB radio so we can keep it alive -------------------

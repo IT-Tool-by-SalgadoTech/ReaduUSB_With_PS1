@@ -9,7 +9,7 @@ Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
 Write-Host "  Script: UAC_On.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0671" -ForegroundColor Cyan
+Write-Host "  ScriptID: ST-WIN-0717" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-24" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Security" -ForegroundColor DarkCyan

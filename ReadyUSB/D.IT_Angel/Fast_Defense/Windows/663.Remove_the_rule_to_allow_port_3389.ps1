@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 663.Remove_the_rule_to_allow_port_3389_(RDP).ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0663" -ForegroundColor Cyan
+Write-Host "  Script: 709.Remove_the_rule_to_allow_port_3389_(RDP).ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0709" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Remote Desktop" -ForegroundColor DarkCyan

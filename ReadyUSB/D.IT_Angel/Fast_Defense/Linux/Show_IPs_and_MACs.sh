@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0668  |  668.Show_IPs_and_MACs.sh
+# ScriptID: ST-LIN-0665  |  668.Show_IPs_and_MACs.sh
 # Sweeps the local subnet to list active device IP/MACs, shows local interface MACs,
 # and lists all IP/MAC addresses currently blocked by IT-Tool.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -7,7 +7,29 @@ if   [ -f "$DIR/_itlib.sh" ];    then . "$DIR/_itlib.sh"
 elif [ -f "$DIR/../_itlib.sh" ]; then . "$DIR/../_itlib.sh"
 else echo "_itlib.sh not found"; exit 1; fi
 
-it_banner "668.Show_IPs_and_MACs.sh" "ST-LIN-0668" "Discovers active LAN devices (IP+MAC), lists local MACs and all IT-Tool blocks"
+# ---- ITTOOL HEADER ----
+it_detect_distro
+printf '\n'
+printf '%s%s%s\n' "$C_CY" ' _____ _____  _______ ____   ____  _     ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '|_   _|_   _||__   __/ __ \ / __ \| |    ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '  | |   | |     | | | |  | | |  | | |    ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '  | |   | |     | | | |  | | |  | | |    ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" ' _| |_  | |     | | | |__| | |__| | |___ ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
+printf '\n'
+echo "${C_WH}  ==================================================================${C_RS}"
+echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
+echo "${C_CY}  Script: 665.Show_IPs_and_MACs.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN-0665${C_RS}"
+echo "${C_CY}  Version: 1.0${C_RS}"
+echo "${C_CY}  Date: 2026-07-12${C_RS}"
+echo "${C_CY}  Category: Linux > Networks${C_RS}"
+echo "${C_CY}  Description: Discovers active LAN devices (IP+MAC), lists local MACs and all IT-Tool blocks${C_RS}"
+echo "${C_CY}  Detected OS: ${IT_DISTRO_PRETTY}  (family: ${IT_FAMILY}, pkg: ${IT_PKG:-none})${C_RS}"
+echo "${C_CY}  (c) 2026 SalgadoTech - All Rights Reserved${C_RS}"
+echo "${C_CY}  Unauthorized distribution prohibited${C_RS}"
+echo "${C_WH}  ==================================================================${C_RS}"
+echo ""
 it_want_root   # read-only; more complete as root but works either way
 
 # --- Build the set of currently blocked IPs/MACs for cross-marking ----------

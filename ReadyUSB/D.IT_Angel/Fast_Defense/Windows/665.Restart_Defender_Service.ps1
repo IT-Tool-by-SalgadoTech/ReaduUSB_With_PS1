@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by ITTOOL" -ForegroundColor Cyan
-Write-Host "  Script: 665.Restart_Defender_Service.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0665" -ForegroundColor Cyan
+Write-Host "  Script: 711.Restart_Defender_Service.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0711" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Admin & Security" -ForegroundColor DarkCyan

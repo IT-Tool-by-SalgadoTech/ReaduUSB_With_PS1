@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 659.Close_Persistent_File.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0659" -ForegroundColor Cyan
+Write-Host "  Script: 705.Close_Persistent_File.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0705" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Firewall & Security" -ForegroundColor DarkCyan

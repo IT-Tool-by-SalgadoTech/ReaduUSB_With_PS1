@@ -1,12 +1,34 @@
 #!/usr/bin/env bash
-# ScriptID: ST-LIN-0651  |  651.Block_suspicious_ip.sh
+# ScriptID: ST-LIN-0648  |  651.Block_suspicious_ip.sh
 # Blocks all inbound and outbound traffic to a suspicious IP via iptables/ip6tables.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if   [ -f "$DIR/_itlib.sh" ];    then . "$DIR/_itlib.sh"
 elif [ -f "$DIR/../_itlib.sh" ]; then . "$DIR/../_itlib.sh"
 else echo "_itlib.sh not found"; exit 1; fi
 
-it_banner "651.Block_suspicious_ip.sh" "ST-LIN-0651" "Blocks inbound+outbound traffic to a suspicious IP via the host firewall"
+# ---- ITTOOL HEADER ----
+it_detect_distro
+printf '\n'
+printf '%s%s%s\n' "$C_CY" ' _____ _____  _______ ____   ____  _     ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '|_   _|_   _||__   __/ __ \ / __ \| |    ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '  | |   | |     | | | |  | | |  | | |    ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '  | |   | |     | | | |  | | |  | | |    ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" ' _| |_  | |     | | | |__| | |__| | |___ ' "$C_RS"
+printf '%s%s%s\n' "$C_CY" '|_____| |_|     |_|  \____/ \____/|_____|' "$C_RS"
+printf '\n'
+echo "${C_WH}  ==================================================================${C_RS}"
+echo "${C_CY}  IT-Tool by SalgadoTech${C_RS}"
+echo "${C_CY}  Script: 648.Block_suspicious_ip.sh${C_RS}"
+echo "${C_CY}  ScriptID: ST-LIN-0648${C_RS}"
+echo "${C_CY}  Version: 1.0${C_RS}"
+echo "${C_CY}  Date: 2026-07-12${C_RS}"
+echo "${C_CY}  Category: Linux > Networks${C_RS}"
+echo "${C_CY}  Description: Blocks inbound+outbound traffic to a suspicious IP via the host firewall${C_RS}"
+echo "${C_CY}  Detected OS: ${IT_DISTRO_PRETTY}  (family: ${IT_FAMILY}, pkg: ${IT_PKG:-none})${C_RS}"
+echo "${C_CY}  (c) 2026 SalgadoTech - All Rights Reserved${C_RS}"
+echo "${C_CY}  Unauthorized distribution prohibited${C_RS}"
+echo "${C_WH}  ==================================================================${C_RS}"
+echo ""
 it_need_root "$@"
 
 ip=$(it_ask "Enter the suspicious IP address to block (IPv4 or IPv6): " "")

@@ -9,8 +9,8 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by ITTOOL" -ForegroundColor Cyan
-Write-Host "  Script: 647.Lock_all_usb_except_bt.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0647" -ForegroundColor Cyan
+Write-Host "  Script: 693.Lock_all_usb_except_bt.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0693" -ForegroundColor Cyan
 Write-Host "  Version: 1.0" -ForegroundColor DarkCyan
 Write-Host "  Date: 2026-06-23" -ForegroundColor DarkCyan
 Write-Host "  Category: Windows > Admin & Security" -ForegroundColor DarkCyan

@@ -9,17 +9,18 @@ Write-Host "|_____| |_|     |_|  \____/ \____/|_____|" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host "  IT-Tool by SalgadoTech" -ForegroundColor Cyan
-Write-Host "  Script: 636.Check_Active_Users_and_Logout.ps1" -ForegroundColor DarkCyan
-Write-Host "  ScriptID: ST-WIN-0636" -ForegroundColor Cyan
+Write-Host "  Script: 688.E._RestoreFreqUnlock.ps1" -ForegroundColor DarkCyan
+Write-Host "  ScriptID: ST-WIN-0688" -ForegroundColor Cyan
 Write-Host "  Version: 1.1" -ForegroundColor DarkCyan
 Write-Host "  Date: 2025-05-22" -ForegroundColor DarkCyan
-Write-Host "  Category: Windows > User Sessions" -ForegroundColor DarkCyan
-Write-Host "  Description: Lists all active user sessions and logs off a selected session by ID" -ForegroundColor DarkCyan
+Write-Host "  Category: Windows > System Restore" -ForegroundColor DarkCyan
+Write-Host "  Description: Removes the 24-hour restriction for creating restore points" -ForegroundColor DarkCyan
 Write-Host "  (c) 2025 SalgadoTech - All Rights Reserved" -ForegroundColor DarkCyan
 Write-Host "  Unauthorized distribution prohibited" -ForegroundColor DarkCyan
 Write-Host "  ==================================================================" -ForegroundColor White
 Write-Host ""
 
+# ── Admin check ───────────────────────────────────────────────────────────────
 $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal   = [Security.Principal.WindowsPrincipal]$currentUser
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -30,27 +31,15 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
     exit 1
 }
 
+# ── Remove 24-hour restore point frequency restriction ────────────────────────
+Write-Host "  Removing restore point frequency restriction..." -ForegroundColor Cyan
 try {
-    Write-Host ""
-    Write-Host "  Current logged-on sessions:" -ForegroundColor Cyan
-    Write-Host ""
-    query user
-    Write-Host ""
-
-    $sessionID = Read-Host "  Enter the Session ID to log off"
-
-    if ($sessionID -match '^\d+$') {
-        Write-Host ""
-        Write-Host "  Logging off session ID $sessionID ..." -ForegroundColor Yellow
-        logoff $sessionID
-        Write-Host "  Session $sessionID logged off successfully." -ForegroundColor Green
-    } else {
-        Write-Host "  ERROR: Invalid Session ID entered." -ForegroundColor Red
-    }
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore" `
+        -Name "SystemRestorePointCreationFrequency" -Value 0 -Type DWord -ErrorAction Stop
+    Write-Host "  Restriction removed. Restore points can now be created at any time." -ForegroundColor Green
 } catch {
-    Write-Host "  ERROR: Failed to log off session." -ForegroundColor Red
-    Write-Host "  $_" -ForegroundColor Red
+    Write-Host "  ERROR: Failed to update registry. $_" -ForegroundColor Red
 }
 
 Write-Host ""
-Read-Host "Press Enter to exit..."
+Read-Host "Press Enter to exit..."  
